@@ -92,6 +92,26 @@ function loadState() {
 const panelsWrap = document.getElementById('panels-wrap');
 const syncToggle = document.getElementById('sync-toggle');
 
+// ── Auto-scale ────────────────────────────────────────────────────────────────
+
+function applyAutoScale() {
+  // Reset first so measurements reflect natural (unscaled) size.
+  panelsWrap.style.transform = '';
+  panelsWrap.style.height    = '';
+
+  const available = window.innerWidth;
+  const natural   = panelsWrap.offsetWidth;
+  if (natural <= 0 || natural <= available) return;
+
+  const factor = available / natural;
+  panelsWrap.style.transform       = `scale(${factor})`;
+  panelsWrap.style.transformOrigin = 'top left';
+  panelsWrap.style.height          = (panelsWrap.offsetHeight * factor) + 'px';
+}
+
+window.addEventListener('resize', applyAutoScale);
+new ResizeObserver(applyAutoScale).observe(panelsWrap);
+
 // ── Render ────────────────────────────────────────────────────────────────────
 
 function render() {
@@ -102,6 +122,7 @@ function render() {
   });
   syncToggle.checked = state.sync;
   updatePresetBtns();
+  applyAutoScale();
 }
 
 // ── Panel ─────────────────────────────────────────────────────────────────────
@@ -112,7 +133,7 @@ function makePanelEl(panel) {
   el.dataset.panelId = panel.id;
 
   // panel width = viewport width + padding on both sides (no wasted gray space)
-  const PAD = 24;
+  const PAD = 12;
   el.style.flex = `0 0 ${panel.viewport.w + PAD * 2}px`;
 
   const win = document.createElement('div');

@@ -111,7 +111,7 @@ html, body {
   flex-shrink: 0;
   background: transparent;
   overflow: visible;
-  padding: 24px;
+  padding: 24px 12px;
 }
 
 /* ─── Browser window (fixed-size mini Chrome) ─────────────── */
