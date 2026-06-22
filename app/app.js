@@ -829,7 +829,7 @@ function openPanelMenu(panelId, anchor) {
   activeDropdown = menu;
 
   const items = [
-    { icon: svgClose(), label: 'Close',                       danger: true, fn: () => removePanel(panelId) },
+    state.panels.length > 1 ? { icon: svgClose(), label: 'Close', danger: true, fn: () => removePanel(panelId) } : null,
     { icon: svgDup(),   label: 'Duplicate',                                 fn: () => duplicatePanel(panelId) },
     null,
     { icon: svgQr(),    label: 'Create QR code for this URL',               fn: () => showQR(tab?.url) },
