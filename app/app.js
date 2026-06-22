@@ -1017,3 +1017,5 @@ function svgTrash()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="curr
 
 applyPermalink();
 render();
+
+window.addEventListener('beforeunload', e => { e.preventDefault(); e.returnValue = ''; });
