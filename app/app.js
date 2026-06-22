@@ -99,14 +99,21 @@ function applyAutoScale() {
   panelsWrap.style.transform = '';
   panelsWrap.style.height    = '';
 
-  const available = window.innerWidth;
-  const natural   = panelsWrap.offsetWidth;
-  if (natural <= 0 || natural <= available) return;
+  const availW = window.innerWidth;
+  const availH = window.innerHeight - (panelsWrap.offsetTop || 0);
+  const naturalW = panelsWrap.offsetWidth;
+  const naturalH = panelsWrap.offsetHeight;
+  if (naturalW <= 0 || naturalH <= 0) return;
 
-  const factor = available / natural;
+  const factor = Math.min(
+    naturalW > availW ? availW / naturalW : 1,
+    naturalH > availH ? availH / naturalH : 1,
+  );
+  if (factor >= 1) return;
+
   panelsWrap.style.transform       = `scale(${factor})`;
   panelsWrap.style.transformOrigin = 'top left';
-  panelsWrap.style.height          = (panelsWrap.offsetHeight * factor) + 'px';
+  panelsWrap.style.height          = (naturalH * factor) + 'px';
 }
 
 window.addEventListener('resize', applyAutoScale);
