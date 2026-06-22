@@ -95,14 +95,14 @@ const syncToggle = document.getElementById('sync-toggle');
 // ── Auto-scale ────────────────────────────────────────────────────────────────
 
 function applyAutoScale() {
-  // Reset first so measurements reflect natural (unscaled) size.
-  panelsWrap.style.transform = '';
-  panelsWrap.style.height    = '';
+  panelsWrap.style.transform  = '';
+  panelsWrap.style.height     = '';
+  panelsWrap.style.marginLeft = '';
 
-  const availW = window.innerWidth;
-  const availH = window.innerHeight - (panelsWrap.offsetTop || 0);
-  const naturalW = panelsWrap.offsetWidth;
-  const naturalH = panelsWrap.offsetHeight;
+  const availW   = window.innerWidth;
+  const availH   = window.innerHeight - (panelsWrap.offsetTop || 0);
+  const naturalW = [...panelsWrap.children].reduce((s, el) => s + el.offsetWidth, 0);
+  const naturalH = panelsWrap.scrollHeight;
   if (naturalW <= 0 || naturalH <= 0) return;
 
   const factor = Math.min(
@@ -111,8 +111,12 @@ function applyAutoScale() {
   );
   if (factor >= 1) return;
 
-  panelsWrap.style.transform       = `scale(${factor})`;
+  // Scale from top-left, then shift right to center the scaled result.
+  const scaledW  = naturalW * factor;
+  const marginL  = Math.max(0, (availW - scaledW) / 2);
   panelsWrap.style.transformOrigin = 'top left';
+  panelsWrap.style.transform       = `scale(${factor})`;
+  panelsWrap.style.marginLeft      = marginL + 'px';
   panelsWrap.style.height          = (naturalH * factor) + 'px';
 }
 
