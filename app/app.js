@@ -17,7 +17,11 @@ const DESKTOP_PRESETS = [
 // ── State ─────────────────────────────────────────────────────────────────────
 
 let _pid = 0, _tid = 0;
-let _suppressHistory = false;
+// Per-iframe suppress flag: key = 'panelId-tabId', value = true when WE
+// initiated the load and don't want to push to history on db-loaded.
+// Must be per-iframe (not global) — otherwise one panel clearing the flag
+// prevents redirect-detection from firing in another panel.
+const _suppressHistory = new Set();
 
 function makeTab(url = '') {
   return { id: 't' + (++_tid), url, history: url ? [url] : [], histIdx: 0, title: 'New Tab', favicon: null };
@@ -26,7 +30,18 @@ function makeTab(url = '') {
 function makePanel(type = 'mobile') {
   const preset = type === 'mobile' ? MOBILE_PRESETS[0] : DESKTOP_PRESETS[1];
   const tab = makeTab();
-  return { id: 'p' + (++_pid), type, viewport: { w: preset.w, h: preset.h }, tabs: [tab], activeTabId: tab.id };
+  // devId: this panel's private token. Goes into every iframe URL as __dbid and
+  // is the match key for the panel's mobile-UA DNR rule. Stable for the panel's life.
+  const devId = 'd' + Math.random().toString(36).slice(2, 11);
+  return { id: 'p' + (++_pid), type, devId, viewport: { w: preset.w, h: preset.h }, tabs: [tab], activeTabId: tab.id, muted: false };
+}
+
+// Promise wrapper around chrome.runtime.sendMessage.
+function sendBg(msg) {
+  return new Promise(resolve => {
+    try { chrome.runtime.sendMessage(msg, resolve); }
+    catch (e) { resolve(undefined); }
+  });
 }
 
 const state = {
@@ -111,6 +126,124 @@ function makePanelEl(panel) {
   return el;
 }
 
+// ── Panel drag-to-reorder ─────────────────────────────────────────────────────
+
+function initPanelDrag(panelId, handleEl) {
+  handleEl.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+
+    const panelEl = panelsWrap.querySelector(`[data-panel-id="${panelId}"]`);
+    if (!panelEl) return;
+
+    const panelRect = panelEl.getBoundingClientRect();
+    const offsetX = e.clientX - panelRect.left;
+
+    // Ghost — shows only the top chrome (tab strip + urlbar)
+    const chromeSrc = panelEl.querySelector('.browser-win');
+    const chromeRect = chromeSrc ? chromeSrc.getBoundingClientRect() : panelRect;
+    const ghostH = Math.min(chromeRect.height, 82);
+
+    const ghost = document.createElement('div');
+    ghost.style.cssText = [
+      'position:fixed',
+      `left:${panelRect.left}px`,
+      `top:${panelRect.top}px`,
+      `width:${panelRect.width}px`,
+      `height:${ghostH}px`,
+      'pointer-events:none',
+      'z-index:9999',
+      'border-radius:10px',
+      'background:rgba(26,115,232,0.07)',
+      'border:2px solid rgba(26,115,232,0.45)',
+      'box-shadow:0 10px 36px rgba(0,0,0,0.22)',
+      'transform:rotate(1.5deg) scale(0.97)',
+      'transition:transform 0.12s',
+      'backdrop-filter:blur(2px)',
+    ].join(';');
+    document.body.appendChild(ghost);
+
+    // Drop indicator line
+    const indicator = document.createElement('div');
+    indicator.style.cssText = [
+      'position:fixed',
+      'width:4px',
+      'border-radius:3px',
+      'background:#1a73e8',
+      'box-shadow:0 0 10px rgba(26,115,232,0.6)',
+      'pointer-events:none',
+      'z-index:9998',
+      'opacity:0',
+      'transition:left 0.1s, opacity 0.1s',
+    ].join(';');
+    document.body.appendChild(indicator);
+
+    panelEl.style.opacity = '0.35';
+    panelEl.style.transition = 'opacity 0.15s';
+    document.body.style.cursor = 'grabbing';
+
+    let dropIdx = -1;
+
+    function onMove(ev) {
+      ghost.style.left = (ev.clientX - offsetX) + 'px';
+      ghost.style.top = panelRect.top + 'px';
+
+      const allPanels = [...panelsWrap.querySelectorAll('.panel')];
+      const wrapRect = panelsWrap.getBoundingClientRect();
+
+      // Find insertion index based on cursor vs panel midpoints
+      let best = allPanels.length;
+      for (let i = 0; i < allPanels.length; i++) {
+        const r = allPanels[i].getBoundingClientRect();
+        if (ev.clientX < r.left + r.width / 2) { best = i; break; }
+      }
+      dropIdx = best;
+
+      // Position the indicator between panels
+      let lineX;
+      if (allPanels.length === 0) {
+        lineX = wrapRect.left;
+      } else if (best === 0) {
+        lineX = allPanels[0].getBoundingClientRect().left - 4;
+      } else if (best >= allPanels.length) {
+        lineX = allPanels[allPanels.length - 1].getBoundingClientRect().right;
+      } else {
+        const prev = allPanels[best - 1].getBoundingClientRect();
+        const next = allPanels[best].getBoundingClientRect();
+        lineX = Math.round((prev.right + next.left) / 2) - 2;
+      }
+
+      indicator.style.left = lineX + 'px';
+      indicator.style.top = wrapRect.top + 'px';
+      indicator.style.height = wrapRect.height + 'px';
+      indicator.style.opacity = '1';
+    }
+
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      ghost.remove();
+      indicator.remove();
+      panelEl.style.opacity = '';
+      panelEl.style.transition = '';
+      document.body.style.cursor = '';
+
+      const fromIdx = state.panels.findIndex(p => p.id === panelId);
+      let toIdx = dropIdx;
+      if (toIdx > fromIdx) toIdx--;
+      if (toIdx >= 0 && toIdx !== fromIdx) {
+        const [panel] = state.panels.splice(fromIdx, 1);
+        state.panels.splice(toIdx, 0, panel);
+        render();
+        saveState();
+      }
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
 // ── Tab strip ─────────────────────────────────────────────────────────────────
 
 function makeTabStrip(panel) {
@@ -121,6 +254,8 @@ function makeTabStrip(panel) {
   const handle = document.createElement('div');
   handle.className = 'drag-handle';
   handle.innerHTML = '⠿';
+  handle.title = 'Przeciągnij aby zmienić kolejność';
+  initPanelDrag(panel.id, handle);
   strip.appendChild(handle);
 
   // tabs area
@@ -145,12 +280,6 @@ function makeTabStrip(panel) {
   const vpChip = makeVpChip(panel);
   right.appendChild(vpChip);
 
-  // mute icon (decorative)
-  const muteBtn = document.createElement('button');
-  muteBtn.className = 'strip-icon-btn';
-  muteBtn.title = 'Wycisz';
-  muteBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>`;
-  right.appendChild(muteBtn);
 
   // panel menu btn
   const menuBtn = document.createElement('button');
@@ -170,26 +299,30 @@ function makeTabEl(panel, tab) {
   el.dataset.tabId = tab.id;
   el.title = tab.url || 'New Tab';
 
+  const content = document.createElement('div');
+  content.className = 'tab-content';
+
   if (tab.favicon) {
     const img = document.createElement('img');
     img.className = 'favicon';
     img.src = tab.favicon;
-    img.width = 14; img.height = 14;
+    img.width = 16; img.height = 16;
     img.onerror = () => img.remove();
-    el.appendChild(img);
+    content.appendChild(img);
   }
 
   const title = document.createElement('span');
   title.className = 'tab-title';
   title.textContent = tab.title || 'New Tab';
-  el.appendChild(title);
+  content.appendChild(title);
 
   const close = document.createElement('span');
   close.className = 'tab-close';
   close.textContent = '×';
   close.onclick = (e) => { e.stopPropagation(); closeTab(panel.id, tab.id); };
-  el.appendChild(close);
+  content.appendChild(close);
 
+  el.appendChild(content);
   el.onclick = () => switchTab(panel.id, tab.id);
   return el;
 }
@@ -267,12 +400,6 @@ function makeUrlbar(panel) {
   input.onfocus = () => input.select();
   bar.appendChild(input);
 
-  const openBtn = document.createElement('button');
-  openBtn.className = 'open-btn';
-  openBtn.title = 'Otwórz w nowej karcie';
-  openBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
-  openBtn.onclick = () => { if (tab?.url) window.open(tab.url, '_blank'); };
-  bar.appendChild(openBtn);
 
   return bar;
 }
@@ -291,13 +418,30 @@ function makeIframe(panel) {
   const tab = getActiveTab(panel);
   const iframe = document.createElement('iframe');
   iframe.id = 'ifr-' + panel.id + '-' + tab.id;
-  // name encodes device type + viewport so content.js (MAIN world) can emulate.
-  // window.name persists across in-frame navigation, even cross-origin.
-  iframe.name = `db|${panel.type}|${panel.viewport.w}|${panel.viewport.h}`;
+  // window.name persists across same-frame navigations (even cross-origin redirects).
+  // emulate.js reads it to know device type + dimensions on every page in this frame.
+  iframe.name = `db|${panel.type}|${panel.viewport.w}|${panel.viewport.h}|${panel.devId}`;
+  iframe.title = panel.type === 'mobile'
+    ? `Podgląd mobilny (${panel.viewport.w}×${panel.viewport.h})`
+    : `Podgląd desktop (${panel.viewport.w}×${panel.viewport.h})`;
+  iframe.setAttribute('width', panel.viewport.w);
+  iframe.setAttribute('height', panel.viewport.h);
   iframe.style.width = panel.viewport.w + 'px';
+  iframe.style.minWidth = panel.viewport.w + 'px';
+  iframe.style.maxWidth = panel.viewport.w + 'px';
+  iframe.style.height = panel.viewport.h + 'px';
   iframe.style.display = 'block';
   iframe.style.border = 'none';
-  iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads';
+  // Sandbox WITHOUT allow-top-navigation: nothing inside the iframe (including
+  // nested ad frames) can navigate our extension page away — the user is never
+  // thrown out of the plugin. target=_blank anchors are intercepted by emulate.js
+  // and reopened as new tabs in this mini-browser; escape-sandbox only affects
+  // rare programmatic window.open popups.
+  iframe.setAttribute('sandbox',
+    'allow-forms allow-modals allow-orientation-lock allow-pointer-lock ' +
+    'allow-popups allow-popups-to-escape-sandbox allow-presentation ' +
+    'allow-same-origin allow-scripts allow-downloads'
+  );
   iframe.onload = () => {
     try {
       const title = iframe.contentDocument?.title;
@@ -311,21 +455,39 @@ function makeIframe(panel) {
   return iframe;
 }
 
-// Loads a URL into an iframe. For mobile panels, first registers a per-iframe
-// mobile-UA DNR rule scoped to a unique token, then loads the URL carrying that
-// token — so the server returns the real mobile site (e.g. i.pl), independently
-// of what the desktop panel does with the same domain.
-function loadIntoIframe(panel, iframe, url) {
-  _suppressHistory = true;
-  if (panel.type !== 'mobile') { iframe.src = url; return; }
-  const token = 'dbm' + Math.random().toString(36).slice(2, 11);
-  let finalUrl;
-  try { const u = new URL(url); u.searchParams.set(token, '1'); finalUrl = u.toString(); }
-  catch (e) { finalUrl = url; }
-  chrome.runtime.sendMessage({ type: 'mobile-ua', panelId: panel.id, token }, () => {
-    _suppressHistory = true;
-    iframe.src = finalUrl;
-  });
+// Appends our private device params to a URL. emulate.js reads them, then strips
+// them from the displayed URL. __dbid is also the DNR match key for mobile UA.
+function buildSrc(panel, url) {
+  try {
+    const u = new URL(url);
+    u.searchParams.set('__dbid', panel.devId);
+    u.searchParams.set('__dbt', panel.type);
+    u.searchParams.set('__dbw', panel.viewport.w);
+    u.searchParams.set('__dbh', panel.viewport.h);
+    return u.toString();
+  } catch (e) { return url; }
+}
+
+// Loads a URL into an iframe.
+// For mobile panels: registers the DNR rule (sets mobile UA for requests
+// bearing __dbid token), then loads the URL with that token embedded.
+// If the server redirects to a mobile subdomain (e.g. trojmiasto.pl →
+// m.trojmiasto.pl), the db-loaded handler detects the host change and
+// calls loadIntoIframe again with the redirect target — this time the
+// token is on the mobile subdomain URL and DNR fires there too.
+async function loadIntoIframe(panel, iframe, url) {
+  const key = iframe.id.slice(4); // strip 'ifr-' → 'panelId-tabId'
+  _suppressHistory.add(key);
+  if (panel.type !== 'mobile') {
+    iframe.src = buildSrc(panel, url);
+    return;
+  }
+  // Register DNR rule (hostname-based) so every request to this domain gets
+  // iPhone UA. Load a clean URL — no token params — so server-side redirects
+  // (e.g. trojmiasto.pl → m.trojmiasto.pl) work correctly.
+  await sendBg({ type: 'db-mobile-ua', devId: panel.devId, url });
+  _suppressHistory.add(key);
+  iframe.src = url;
 }
 
 // ── Divider ───────────────────────────────────────────────────────────────────
@@ -367,7 +529,7 @@ function navigate(panelId, rawUrl, push = true) {
   const tab = getActiveTab(panel);
   tab.url = url;
   if (push) { tab.history = tab.history.slice(0, tab.histIdx + 1); tab.history.push(url); tab.histIdx = tab.history.length - 1; }
-  if (!tab.favicon) tab.favicon = faviconUrl(url);
+  tab.favicon = faviconUrl(url);
   refreshUrlbar(panelId);
   refreshTabStrip(panelId);
   saveState();
@@ -402,10 +564,14 @@ function reloadPanel(panelId) {
   if (iframe && tab.url) loadIntoIframe(panel, iframe, tab.url);
 }
 
-// Messages from content.js (MAIN world) in each iframe.
+// Messages from emulate.js (MAIN world) running inside each panel iframe.
+//   db-loaded    — a page finished loading or an SPA pushState/popstate happened.
+//   db-urlchange — replaceState: update URL bar/title, never touch history.
+//   db-navigate  — a same-frame link click: navigate this panel (re-attaches params).
+//   db-newtab    — a target=_blank link: open in a new tab of this mini-browser.
 window.addEventListener('message', e => {
   const data = e.data;
-  if (!data || (data.type !== 'iframe-navigated' && data.type !== 'mobile-reload-needed' && data.type !== 'navigate-request')) return;
+  if (!data || (data.type !== 'db-loaded' && data.type !== 'db-urlchange' && data.type !== 'db-navigate' && data.type !== 'db-newtab')) return;
   const iframe = [...document.querySelectorAll('iframe')].find(f => f.contentWindow === e.source);
   if (!iframe) return;
   const parts = iframe.id.split('-');
@@ -415,37 +581,60 @@ window.addEventListener('message', e => {
   const url = data.url;
   if (!url || url === 'about:blank') return;
 
-  if (data.type === 'navigate-request') {
-    // Intercepted link click inside a mobile frame — load directly with a token
-    // so the first request is already mobile (no desktop flash, no reload).
+  if (data.type === 'db-newtab') {
+    addTab(panelId, url);
+    return;
+  }
+
+  if (data.type === 'db-navigate') {
     navigate(panelId, url);
     return;
   }
 
-  if (data.type === 'mobile-reload-needed') {
-    // Real user navigation inside a mobile frame that was served as desktop.
-    // Record it in history, then reload WITH a token so the server returns mobile.
-    if (url !== tab.url) {
-      tab.history = tab.history.slice(0, tab.histIdx + 1);
-      tab.history.push(url);
-      tab.histIdx = tab.history.length - 1;
-    }
+  if (data.type === 'db-urlchange') {
+    // replaceState — update URL bar and title without pushing to history.
     tab.url = url;
-    if (!tab.favicon) tab.favicon = faviconUrl(url);
+    if (data.title) tab.title = data.title;
+    tab.favicon = faviconUrl(url);
     if (tab.id === panel.activeTabId) { refreshUrlbar(panelId); refreshTabStrip(panelId); saveState(); }
-    loadIntoIframe(panel, iframe, url); // adds fresh token + mobile-UA rule, reloads
     return;
   }
 
-  // iframe-navigated: desktop frames, or the final tokened mobile load.
-  if (!_suppressHistory && url !== tab.url) {
+  // db-loaded
+  const _suppKey = panelId + '-' + tabId;
+  const _wasSuppressed = _suppressHistory.has(_suppKey);
+
+  // Detect server-side redirect to a mobile subdomain (e.g. trojmiasto.pl →
+  // m.trojmiasto.pl). When it happens the token is gone from the redirect URL,
+  // so DNR didn't fire for that request. Reload the redirect target with our
+  // token so the server receives mobile UA and serves mobile content.
+  if (panel.type === 'mobile' && _wasSuppressed) {
+    let fromHost, toHost;
+    try { fromHost = new URL(tab.url).hostname; } catch (e) {}
+    try { toHost   = new URL(url).hostname;     } catch (e) {}
+    if (fromHost && toHost && fromHost !== toHost) {
+      // Update history entry in-place (transparent server redirect, not a user navigation).
+      if (tab.histIdx >= 0) tab.history[tab.histIdx] = url;
+      tab.url = url;
+      tab.favicon = faviconUrl(url);
+      _suppressHistory.delete(_suppKey);
+      const ifr = document.getElementById('ifr-' + panelId + '-' + tabId);
+      if (ifr) loadIntoIframe(panel, ifr, url);
+      if (tab.id === panel.activeTabId) { refreshUrlbar(panelId); refreshTabStrip(panelId); saveState(); }
+      return;
+    }
+  }
+
+  if (!_wasSuppressed && url !== tab.url) {
     tab.history = tab.history.slice(0, tab.histIdx + 1);
     tab.history.push(url);
     tab.histIdx = tab.history.length - 1;
   }
-  _suppressHistory = false;
+  _suppressHistory.delete(_suppKey);
+
   tab.url = url;
-  if (!tab.favicon) tab.favicon = faviconUrl(url);
+  if (data.title) tab.title = data.title;
+  tab.favicon = faviconUrl(url);
   if (tab.id === panel.activeTabId) { refreshUrlbar(panelId); refreshTabStrip(panelId); saveState(); }
 });
 
@@ -458,6 +647,16 @@ function addTab(panelId, url = '') {
   panel.tabs.push(tab);
   panel.activeTabId = tab.id;
   refreshPanel(panelId);
+  saveState();
+}
+
+// Opens a new tab without switching focus — current tab stays active.
+function addTabBackground(panelId, url = '') {
+  const panel = getPanel(panelId);
+  const tab = makeTab(url);
+  if (url) tab.favicon = faviconUrl(url);
+  panel.tabs.push(tab);
+  refreshTabStrip(panelId);
   saveState();
 }
 
@@ -478,12 +677,17 @@ function closeTab(panelId, tabId) {
   saveState();
 }
 
+// Mute the entire tab permanently so no audio ever plays from the extension page.
+chrome.runtime.sendMessage({ type: 'set-panel-mute', muted: true });
+
 // ── Panels ────────────────────────────────────────────────────────────────────
 
 function addPanel(type) { state.panels.push(makePanel(type)); render(); saveState(); }
 
 function removePanel(panelId) {
   if (state.panels.length <= 1) return;
+  const panel = getPanel(panelId);
+  if (panel) sendBg({ type: 'db-clear-ua', devId: panel.devId });
   state.panels = state.panels.filter(p => p.id !== panelId);
   render(); saveState();
 }
@@ -499,6 +703,8 @@ function duplicatePanel(panelId) {
 
 function switchPanelType(panelId) {
   const panel = getPanel(panelId);
+  // Leaving mobile → drop the mobile-UA rule so the desktop view isn't spoofed.
+  if (panel.type === 'mobile') sendBg({ type: 'db-clear-ua', devId: panel.devId });
   panel.type = panel.type === 'mobile' ? 'desktop' : 'mobile';
   panel.viewport = panel.type === 'mobile' ? { w: MOBILE_PRESETS[0].w, h: MOBILE_PRESETS[0].h } : { w: DESKTOP_PRESETS[1].w, h: DESKTOP_PRESETS[1].h };
   refreshPanel(panelId); saveState();
@@ -611,15 +817,14 @@ function showQR(url) {
 document.getElementById('qr-close').onclick = () => document.getElementById('qr-modal').classList.remove('open');
 document.getElementById('qr-modal').onclick = e => { if (e.target.id === 'qr-modal') document.getElementById('qr-modal').classList.remove('open'); };
 
-function drawQR(canvas, text) {
-  const s = 200; canvas.width = s; canvas.height = s;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, s, s);
-  ctx.fillStyle = '#111'; ctx.font = '11px monospace'; ctx.textAlign = 'center';
-  ctx.fillText('Skanuj URL:', s/2, 80);
-  const wrap = t => { const r = []; for (let i=0; i<t.length; i+=28) r.push(t.slice(i,i+28)); return r; };
-  wrap(text).slice(0,4).forEach((l,i) => ctx.fillText(l, s/2, 100+i*15));
-  ctx.strokeStyle = '#000'; ctx.lineWidth = 6; ctx.strokeRect(3,3,s-6,s-6);
+function drawQR(container, text) {
+  container.innerHTML = '';
+  QRCode.toString(text, { type: 'svg', margin: 4, errorCorrectionLevel: 'M' }, (err, svg) => {
+    if (err) { container.textContent = 'Błąd QR'; return; }
+    container.innerHTML = svg;
+    const svgEl = container.querySelector('svg');
+    if (svgEl) { svgEl.style.width = '260px'; svgEl.style.height = '260px'; }
+  });
 }
 
 // ── Clear storage ─────────────────────────────────────────────────────────────
@@ -751,4 +956,3 @@ function svgTrash()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="curr
 
 applyPermalink();
 render();
-notifyMobileDomains();
