@@ -722,13 +722,42 @@ function duplicatePanel(panelId) {
   render(); saveState();
 }
 
-function switchPanelType(panelId) {
-  const panel = getPanel(panelId);
-  // Leaving mobile → drop the mobile-UA rule so the desktop view isn't spoofed.
-  if (panel.type === 'mobile') sendBg({ type: 'db-clear-ua', devId: panel.devId });
-  panel.type = panel.type === 'mobile' ? 'desktop' : 'mobile';
-  panel.viewport = panel.type === 'mobile' ? { w: MOBILE_PRESETS[0].w, h: MOBILE_PRESETS[0].h } : { w: DESKTOP_PRESETS[1].w, h: DESKTOP_PRESETS[1].h };
-  refreshPanel(panelId); saveState();
+async function switchPanelType(panelId) {
+  const panel   = getPanel(panelId);
+  const leavingMobile = panel.type === 'mobile';
+
+  // Wait for DNR rule removal BEFORE loading the new iframe — otherwise the
+  // first request fires while the mobile-UA rule is still active.
+  if (leavingMobile) await sendBg({ type: 'db-clear-ua', devId: panel.devId });
+
+  panel.type     = leavingMobile ? 'desktop' : 'mobile';
+  panel.viewport = panel.type === 'mobile'
+    ? { w: MOBILE_PRESETS[0].w,  h: MOBILE_PRESETS[0].h  }
+    : { w: DESKTOP_PRESETS[1].w, h: DESKTOP_PRESETS[1].h };
+
+  // When leaving mobile, strip mobile subdomain (m., mobile.) so the desktop
+  // version loads instead of staying on m.trojmiasto.pl etc.
+  if (leavingMobile) {
+    const tab = getActiveTab(panel);
+    try {
+      const u = new URL(tab.url);
+      u.hostname = u.hostname.replace(/^(m|mobile)\./, '');
+      tab.url = u.toString();
+    } catch (e) {}
+  }
+
+  // Update panel element width and browser-win width to match new viewport.
+  const PAD = 12;
+  const el  = panelsWrap.querySelector(`[data-panel-id="${panelId}"]`);
+  if (el) {
+    el.style.flex = `0 0 ${panel.viewport.w + PAD * 2}px`;
+    const win = el.querySelector('.browser-win');
+    if (win) win.style.width = panel.viewport.w + 'px';
+  }
+
+  refreshPanel(panelId);
+  applyAutoScale();
+  saveState();
 }
 
 // ── Viewport ──────────────────────────────────────────────────────────────────
