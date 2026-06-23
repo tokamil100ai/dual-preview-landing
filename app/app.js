@@ -348,11 +348,13 @@ function makeTabEl(panel, tab) {
   title.textContent = tab.title || 'New Tab';
   content.appendChild(title);
 
-  const close = document.createElement('span');
-  close.className = 'tab-close';
-  close.textContent = '×';
-  close.onclick = (e) => { e.stopPropagation(); closeTab(panel.id, tab.id); };
-  content.appendChild(close);
+  if (panel.tabs.length > 1) {
+    const close = document.createElement('span');
+    close.className = 'tab-close';
+    close.textContent = '×';
+    close.onclick = (e) => { e.stopPropagation(); closeTab(panel.id, tab.id); };
+    content.appendChild(close);
+  }
 
   el.appendChild(content);
   el.onclick = () => switchTab(panel.id, tab.id);
