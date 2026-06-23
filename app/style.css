@@ -588,11 +588,16 @@ html, body {
   font-size: 13px; color: var(--accent); cursor: pointer; padding: 6px 2px;
 }
 .bg-reset-row:hover { text-decoration: underline; }
-.bg-footer {
-  display: flex; justify-content: flex-end;
-  padding: 14px 18px 0;
-  border-top: 1px solid #e8eaed; margin-top: 16px;
+.bg-footer, .modal-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  border-top: 1px solid #e8eaed; margin-top: 12px;
 }
+.make-default-wrap {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-muted); cursor: pointer;
+}
+.make-default-wrap input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
 .bg-save-btn {
   background: var(--accent); color: #fff;
   border: none; border-radius: 6px;

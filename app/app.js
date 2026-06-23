@@ -16,6 +16,100 @@ const DESKTOP_PRESETS = [
   { label: '1920px', w: 1920, h: 900 },
 ];
 
+// ── Screen size options ───────────────────────────────────────────────────────
+
+const MOBILE_SIZE_OPTIONS = [
+  { label: 'iPhone X / 11 / 12 / 13 — 375 × 812', w: 375, h: 812 },
+  { label: 'iPhone 14 Pro / 15 — 393 × 852',       w: 393, h: 852 },
+  { label: 'Samsung Galaxy S24 — 360 × 780',        w: 360, h: 780 },
+];
+const DESKTOP_WIDTH_OPTIONS = [
+  { label: '1280px', w: 1280 },
+  { label: '1440px', w: 1440 },
+  { label: '1920px', w: 1920 },
+];
+
+const defaultSizes = { mobileW: 375, mobileH: 812, desktopW: 1440 };
+
+function applyScreenSizes(mobileW, mobileH, desktopW) {
+  defaultSizes.mobileW = mobileW;
+  defaultSizes.mobileH = mobileH;
+  defaultSizes.desktopW = desktopW;
+  state.panels.forEach(p => {
+    p.viewport = p.type === 'mobile'
+      ? { w: mobileW, h: mobileH }
+      : { w: desktopW, h: mobileH };
+  });
+  render();
+  requestAnimationFrame(applyAutoScale);
+}
+
+function openScreenSizesModal() {
+  const existing = document.getElementById('screen-sizes-modal');
+  if (existing) { existing.remove(); return; }
+
+  const curMobile = MOBILE_SIZE_OPTIONS.find(o => o.w === defaultSizes.mobileW) || MOBILE_SIZE_OPTIONS[0];
+  const curDesktopW = defaultSizes.desktopW;
+
+  let selMobile = curMobile;
+  let selDesktopW = curDesktopW;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'screen-sizes-modal';
+  overlay.className = 'modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  const box = document.createElement('div');
+  box.className = 'modal-box scaling-box';
+  box.onclick = e => e.stopPropagation();
+
+  box.innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">Screen sizes</span>
+      <button class="modal-close" id="ss-close">×</button>
+    </div>
+    <div class="bg-section-label">Mobile</div>
+    <div class="scaling-options" id="ss-mobile"></div>
+    <div class="bg-section-label" style="margin-top:4px">Desktop width</div>
+    <div class="scaling-options" id="ss-desktop"></div>
+    <div class="modal-footer">
+      <label class="make-default-wrap"><input type="checkbox" id="ss-default"> Make it default</label>
+      <button class="bg-save-btn" id="ss-save">Save</button>
+    </div>
+  `;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  document.getElementById('ss-close').onclick = () => overlay.remove();
+
+  function renderOptions(containerId, options, getVal, setVal, keyFn) {
+    const el = document.getElementById(containerId);
+    options.forEach(opt => {
+      const row = document.createElement('label');
+      row.className = 'scaling-row' + (keyFn(opt) === keyFn(getVal()) ? ' selected' : '');
+      row.innerHTML = `<input type="radio" name="${containerId}" value="${opt.w}" ${keyFn(opt) === keyFn(getVal()) ? 'checked' : ''}>
+        <div class="scaling-row-text"><span class="scaling-row-label">${opt.label}</span></div>`;
+      row.querySelector('input').onchange = () => {
+        setVal(opt);
+        el.querySelectorAll('.scaling-row').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+      };
+      el.appendChild(row);
+    });
+  }
+
+  renderOptions('ss-mobile',  MOBILE_SIZE_OPTIONS,       () => selMobile,  v => { selMobile = v; },  o => o.w);
+  renderOptions('ss-desktop', DESKTOP_WIDTH_OPTIONS.map(o => ({ ...o, label: o.label })), () => ({ w: selDesktopW }), v => { selDesktopW = v.w; }, o => o.w);
+
+  document.getElementById('ss-save').onclick = () => {
+    applyScreenSizes(selMobile.w, selMobile.h, selDesktopW);
+    if (document.getElementById('ss-default').checked) {
+      chrome.storage.local.set({ screen_sizes: { mobileW: selMobile.w, mobileH: selMobile.h, desktopW: selDesktopW } });
+    }
+    overlay.remove();
+  };
+}
+
 // ── Background ────────────────────────────────────────────────────────────────
 
 const BG_IMAGES = [
@@ -40,9 +134,9 @@ function applyBackground(bg) {
   }
 }
 
-function saveBackground(bg) {
-  chrome.storage.local.set({ bg });
+function saveBackground(bg, persist = false) {
   applyBackground(bg);
+  if (persist) chrome.storage.local.set({ bg });
 }
 
 function loadBackground() {
@@ -84,7 +178,8 @@ function openBgPicker() {
     <div class="bg-images" id="bg-images"></div>
     <div class="bg-section-label" style="margin-top:14px">Reset</div>
     <button class="bg-reset-row" id="bg-reset">Reset to default</button>
-    <div class="bg-footer">
+    <div class="modal-footer">
+      <label class="make-default-wrap"><input type="checkbox" id="bg-default"> Make it default</label>
       <button class="bg-save-btn" id="bg-save">Save</button>
     </div>
   `;
@@ -143,7 +238,7 @@ function openBgPicker() {
   document.getElementById('bg-reset').onclick = () => preview({ type: 'default' });
 
   document.getElementById('bg-save').onclick = () => {
-    if (pendingBg) saveBackground(pendingBg);
+    if (pendingBg) saveBackground(pendingBg, document.getElementById('bg-default').checked);
     overlay.remove();
   };
 }
@@ -172,11 +267,24 @@ function openScalingModal() {
       <button class="modal-close" id="scaling-close">×</button>
     </div>
     <div class="scaling-options" id="scaling-options"></div>
+    <div class="modal-footer">
+      <label class="make-default-wrap"><input type="checkbox" id="scaling-default"> Make it default</label>
+      <button class="bg-save-btn" id="scaling-save">Save</button>
+    </div>
   `;
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 
-  document.getElementById('scaling-close').onclick = () => overlay.remove();
+  const originalScaling = state.scaling;
+  let pendingScaling = state.scaling;
+
+  const closeScaling = () => {
+    state.scaling = originalScaling;
+    applyAutoScale();
+    overlay.remove();
+  };
+  overlay.onclick = e => { if (e.target === overlay) closeScaling(); };
+  document.getElementById('scaling-close').onclick = closeScaling;
 
   const optionsEl = document.getElementById('scaling-options');
   options.forEach(opt => {
@@ -190,6 +298,7 @@ function openScalingModal() {
       </div>
     `;
     row.querySelector('input').onchange = () => {
+      pendingScaling = opt.value;
       state.scaling = opt.value;
       optionsEl.querySelectorAll('.scaling-row').forEach(r => r.classList.remove('selected'));
       row.classList.add('selected');
@@ -197,6 +306,15 @@ function openScalingModal() {
     };
     optionsEl.appendChild(row);
   });
+
+  document.getElementById('scaling-save').onclick = () => {
+    state.scaling = pendingScaling;
+    applyAutoScale();
+    if (document.getElementById('scaling-default').checked) {
+      chrome.storage.local.set({ scaling: pendingScaling });
+    }
+    overlay.remove();
+  };
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -213,7 +331,9 @@ function makeTab(url = '') {
 }
 
 function makePanel(type = 'mobile') {
-  const preset = type === 'mobile' ? MOBILE_PRESETS[0] : DESKTOP_PRESETS[1];
+  const preset = type === 'mobile'
+    ? { w: defaultSizes.mobileW, h: defaultSizes.mobileH }
+    : { w: defaultSizes.desktopW, h: defaultSizes.mobileH };
   const tab = makeTab();
   // devId: this panel's private token. Goes into every iframe URL as __dbid and
   // is the match key for the panel's mobile-UA DNR rule. Stable for the panel's life.
@@ -1327,8 +1447,9 @@ function openPanelMenu(panelId, anchor) {
   ].filter(Boolean);
 
   const extItems = [
-    { icon: svgBgIcon(),     label: 'Background',    fn: () => openBgPicker() },
-    { icon: svgScaleIcon(),  label: 'Scaling',  fn: () => openScalingModal() },
+    { icon: svgBgIcon(),      label: 'Background',   fn: () => openBgPicker() },
+    { icon: svgScaleIcon(),   label: 'Scaling',      fn: () => openScalingModal() },
+    { icon: svgScreenIcon(),  label: 'Screen sizes', fn: () => openScreenSizesModal() },
   ];
 
   function addSection(label, sectionItems) {
@@ -1500,7 +1621,8 @@ function svgSwitch() { return `<svg viewBox="0 0 24 24" fill="none" stroke="curr
 function svgCam()    { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>`; }
 function svgSpeed()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`; }
 function svgBgIcon()    { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`; }
-function svgScaleIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`; }
+function svgScaleIcon()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`; }
+function svgScreenIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="22" x2="16" y2="22"/><line x1="12" y1="18" x2="12" y2="22"/></svg>`; }
 function svgTrash()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>`; }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
@@ -1508,7 +1630,18 @@ function svgTrash()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="curr
 // loadState(); — disabled: always start with default panels
 
 loadBackground();
-applyPermalink();
-render();
+chrome.storage.local.get(['scaling', 'screen_sizes'], (res) => {
+  if (res.scaling) { state.scaling = res.scaling; }
+  if (res.screen_sizes) {
+    const s = res.screen_sizes;
+    defaultSizes.mobileW = s.mobileW; defaultSizes.mobileH = s.mobileH; defaultSizes.desktopW = s.desktopW;
+    state.panels.forEach(p => {
+      p.viewport = p.type === 'mobile' ? { w: s.mobileW, h: s.mobileH } : { w: s.desktopW, h: s.mobileH };
+    });
+  }
+  applyPermalink();
+  render();
+  applyAutoScale();
+});
 
 window.addEventListener('beforeunload', e => { e.preventDefault(); e.returnValue = ''; });
