@@ -964,12 +964,18 @@ function openPanelMenu(panelId, anchor) {
     null,
     { icon: svgQr(),    label: 'Create QR code for this URL',               fn: () => showQR(tab?.url) },
     { icon: svgSwitch(),label: panel.type === 'mobile' ? 'Switch to desktop' : 'Switch to mobile', fn: () => switchPanelType(panelId) },
-    { icon: svgCam(),   label: 'Screenshot',                                fn: () => alert('Użyj Cmd+Shift+4') },
     { icon: svgSpeed(), label: 'Open in PageSpeed Insights',                fn: () => tab?.url && window.open('https://pagespeed.web.dev/report?url=' + encodeURIComponent(tab.url), '_blank') },
     { icon: svgTrash(), label: 'Clear cookies and local storage',           fn: () => clearStorage(panelId) },
   ];
 
-  items.forEach(item => {
+  // Remove leading/trailing separators (nulls) to avoid orphan lines.
+  const trimmed = items.filter((x, i, a) => {
+    if (x !== null) return true;
+    const prev = a.slice(0, i).findLast(v => v !== null);
+    const next = a.slice(i + 1).find(v => v !== null);
+    return !!prev && !!next;
+  });
+  trimmed.forEach(item => {
     if (!item) { const s = document.createElement('div'); s.className = 'dropdown-sep'; menu.appendChild(s); return; }
     const el = document.createElement('div');
     el.className = 'dropdown-item' + (item.danger ? ' danger' : '');
