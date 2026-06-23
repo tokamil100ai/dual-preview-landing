@@ -444,6 +444,103 @@ function navBtn(svg, title) {
   return btn;
 }
 
+// ── New-tab facts ─────────────────────────────────────────────────────────────
+
+const FACTS = {
+  mobile: [
+    "The first smartphone, IBM Simon, was released in 1994 — 13 years before the iPhone.",
+    "Mobile users spend 90% of their time in apps, not in mobile browsers.",
+    "The average person checks their phone 96 times a day — once every 10 minutes.",
+    "Touch screens were invented in 1965 by E.A. Johnson for air traffic control.",
+    "Over 6 billion people have smartphones — more than have access to running water.",
+    "The first mobile phone call was made in 1973 and lasted 30 minutes.",
+    "Apple's App Store launched in 2008 with just 500 apps. Today there are over 1.8 million.",
+    "Mobile data traffic has grown 100× in the last 10 years.",
+    "The average smartphone today is more powerful than all of NASA's computers in 1969.",
+    "Mobile users convert 3× slower than desktop users — despite generating more traffic.",
+    "The word 'smartphone' was first used in 1997 by Ericsson to describe their GS 88 model.",
+    "A typical mobile user touches their screen 2,617 times a day.",
+    "The largest app market by downloads is India, followed by China and the US.",
+    "Mobile page load time above 3 seconds causes 53% of users to abandon the site.",
+    "The iPhone's original price in 2007 was $499 — equivalent to about $750 today.",
+    "Android's first phone, the HTC Dream, launched in 2008 with a full slide-out keyboard.",
+    "Mobile screens have gone from 3.5\" (iPhone 1) to 6.7\" (iPhone 15 Pro Max) in 17 years.",
+    "The longest phone call ever recorded lasted 56 hours, 4 minutes.",
+    "5G is up to 100× faster than 4G and has latency as low as 1 millisecond.",
+    "Over 50% of all web traffic now comes from mobile devices.",
+    "Dark mode can reduce battery usage by up to 47% on OLED screens.",
+    "The human thumb can comfortably reach only 75% of a 6\" screen one-handed.",
+    "Push notifications have an average open rate of 7.8% — far higher than email.",
+    "In Japan, 90% of teens use their phones in the shower — driving waterproof phone demand.",
+    "The average app loses 77% of its daily active users within the first 3 days after install.",
+    "Mobile ad spending surpassed desktop ad spending for the first time in 2015.",
+    "The most-downloaded app of all time is Facebook — followed by WhatsApp and Messenger.",
+    "A dropped phone screen repair costs on average $200, making screen protectors very popular.",
+    "Safari on iOS is the most popular mobile browser globally with over 27% market share.",
+    "The first phone to feature a camera was the Sharp J-SH04, released in Japan in 2000.",
+  ],
+  desktop: [
+    "The first commercial desktop computer, the Altair 8800, launched in 1975 for $439.",
+    "The average desktop monitor refresh rate has jumped from 60Hz to 144Hz or more in 10 years.",
+    "A standard desktop SSD is 30× faster at reading data than a hard drive from 2010.",
+    "The QWERTY keyboard layout was designed in 1873 to slow typists down and prevent jamming.",
+    "The first computer mouse had two perpendicular wheels — not a ball or optical sensor.",
+    "Desktop users spend an average of 15 minutes longer per session than mobile users.",
+    "The world's first website (info.cern.ch) was built on a NeXT desktop workstation in 1990.",
+    "A modern CPU performs over 3 billion cycles per second — the first ran at 740,000.",
+    "The 'blue screen of death' first appeared in Windows 3.1 in 1992.",
+    "Desktop conversion rates average 3.9% — significantly higher than mobile at 1.8%.",
+    "The '@' symbol in email addresses was chosen in 1971 because it meant 'at a rate of'.",
+    "Windows 95's launch was so hyped that stores opened at midnight — a first for software.",
+    "The average desktop page has grown from 702KB in 2010 to over 2.5MB today.",
+    "Double-clicking was not standard until 1984 when the Mac introduced it to consumers.",
+    "The first 1GB hard drive, released in 1980, weighed 550 pounds and cost $40,000.",
+    "A full HD monitor can display over 2 million pixels simultaneously.",
+    "The world's fastest desktop CPU can perform over 100 billion floating-point operations per second.",
+    "Copy and paste was invented by Larry Tesler at Xerox PARC in 1973.",
+    "Desktop users are 68% more likely to complete a purchase than mobile users.",
+    "The first computer virus, 'Creeper', appeared in 1971 and displayed 'I'm the creeper, catch me if you can!'",
+    "WiFi was invented in 1997 — the same year Google was founded.",
+    "The spacebar is the most-pressed key on a keyboard, hit about 20,000 times a day by a typical user.",
+    "A standard 1080p monitor has 2,073,600 pixels — each capable of showing 16.7 million colors.",
+    "The first email was sent in 1971 between two computers sitting side by side in the same room.",
+    "Desktop browsers account for 70%+ of all B2B web traffic, making them crucial for SaaS products.",
+    "The Ctrl+Z undo shortcut was introduced by Apple in 1984 and adopted by Microsoft in 1990.",
+    "The average office worker opens 8 browser tabs simultaneously.",
+    "Desktop CPUs now include built-in AI accelerators capable of running neural networks locally.",
+    "The resolution of a 4K monitor is 4× higher than 1080p — exactly 8,294,400 pixels.",
+    "The first graphical web browser, Mosaic, was released in 1993 and changed the internet forever.",
+  ],
+};
+
+function getNextFact(type) {
+  const key = 'db-facts-' + type;
+  let queue;
+  try { queue = JSON.parse(localStorage.getItem(key) || 'null'); } catch(e) { queue = null; }
+  if (!Array.isArray(queue) || queue.length === 0) {
+    queue = [...Array(FACTS[type].length).keys()].sort(() => Math.random() - 0.5);
+  }
+  const idx = queue.shift();
+  try { localStorage.setItem(key, JSON.stringify(queue)); } catch(e) {}
+  return FACTS[type][idx];
+}
+
+function makeNewTabPage(panel) {
+  const fact = getNextFact(panel.type);
+  const icon = panel.type === 'mobile' ? '📱' : '🖥';
+  const el = document.createElement('div');
+  el.className = 'new-tab-page';
+  el.innerHTML = `
+    <div class="new-tab-fact">
+      <span class="new-tab-icon">${icon}</span>
+      <p class="new-tab-label">Did you know?</p>
+      <p class="new-tab-text">${fact}</p>
+    </div>`;
+  el.style.width = panel.viewport.w + 'px';
+  el.style.height = panel.viewport.h + 'px';
+  return el;
+}
+
 // ── Iframe ────────────────────────────────────────────────────────────────────
 
 function makeIframe(panel) {
@@ -478,7 +575,26 @@ function makeIframe(panel) {
       }
     } catch(e) {}
   };
-  if (tab.url) loadIntoIframe(panel, iframe, tab.url);
+  if (tab.url) {
+    loadIntoIframe(panel, iframe, tab.url);
+  } else {
+    const page = makeNewTabPage(panel);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>*{margin:0;padding:0;box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;background:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{display:flex;flex-direction:column;align-items:center;padding-top:180px}
+.wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:320px;text-align:center}
+.icon{font-size:36px;opacity:.35}
+.label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5f6368;opacity:.6}
+.text{font-size:13px;line-height:1.6;color:#5f6368;opacity:.7}
+</style></head><body>
+<div class="wrap">
+  <span class="icon">${panel.type === 'mobile' ? '📱' : '🖥'}</span>
+  <p class="label">Did you know?</p>
+  <p class="text">${page.querySelector('.new-tab-text').textContent}</p>
+</div></body></html>`;
+    iframe.srcdoc = html;
+  }
   return iframe;
 }
 
@@ -505,6 +621,7 @@ function buildSrc(panel, url) {
 async function loadIntoIframe(panel, iframe, url) {
   const key = iframe.id.slice(4); // strip 'ifr-' → 'panelId-tabId'
   _suppressHistory.add(key);
+  iframe.removeAttribute('srcdoc');
   if (panel.type !== 'mobile') {
     iframe.src = buildSrc(panel, url);
     return;
@@ -803,7 +920,7 @@ function refreshPanel(panelId) {
   refreshTabStrip(panelId);
   refreshUrlbar(panelId);
   const oldIframe = el.querySelector('iframe');
-  const newIframe = makeIframe(panel); // makeIframe loads tab.url itself (with mobile token)
+  const newIframe = makeIframe(panel);
   oldIframe.replaceWith(newIframe);
 }
 
