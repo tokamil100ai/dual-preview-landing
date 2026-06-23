@@ -467,7 +467,185 @@ function makePanelEl(panel) {
   win.appendChild(makeIframe(panel));
   el.appendChild(win);
 
+  // Resize handles
+  const rHandleX = document.createElement('div');
+  rHandleX.className = 'resize-handle-x';
+  el.appendChild(rHandleX);
+  initResizeX(panel.id, rHandleX);
+
+  const rHandleY = document.createElement('div');
+  rHandleY.className = 'resize-handle-y';
+  el.appendChild(rHandleY);
+  initResizeY(panel.id, rHandleY);
+
   return el;
+}
+
+// ── Panel resize ──────────────────────────────────────────────────────────────
+
+const SNAP_THRESHOLD = 20;
+
+function getSnapCandidatesX(panelType) {
+  return panelType === 'mobile' ? [defaultSizes.mobileW] : [defaultSizes.desktopW];
+}
+function getSnapCandidatesY() {
+  return [defaultSizes.mobileH];
+}
+function snapValue(val, candidates) {
+  for (const c of candidates) {
+    if (Math.abs(val - c) <= SNAP_THRESHOLD) return c;
+  }
+  return val;
+}
+
+function showSnapLine(panelId, axis) {
+  hideSnapLine();
+  const el = panelsWrap.querySelector(`[data-panel-id="${panelId}"]`);
+  if (!el) return;
+  const win = el.querySelector('.browser-win');
+  if (!win) return;
+  const line = document.createElement('div');
+  line.id = 'snap-line';
+  line.className = axis === 'x' ? 'snap-line-x' : 'snap-line-y';
+  win.style.position = 'relative';
+  win.appendChild(line);
+}
+function hideSnapLine() {
+  document.getElementById('snap-line')?.remove();
+}
+
+function showResizeTooltip(x, y, text) {
+  let tip = document.getElementById('resize-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'resize-tooltip';
+    document.body.appendChild(tip);
+  }
+  tip.textContent = text;
+  tip.style.left = (x + 14) + 'px';
+  tip.style.top  = (y - 10) + 'px';
+  tip.style.display = 'block';
+}
+function hideResizeTooltip() {
+  const tip = document.getElementById('resize-tooltip');
+  if (tip) tip.style.display = 'none';
+}
+
+function addIframeOverlay() {
+  document.querySelectorAll('iframe').forEach(f => {
+    const ov = document.createElement('div');
+    ov.className = 'iframe-drag-overlay';
+    ov.style.cssText = 'position:absolute;inset:0;z-index:9998;';
+    f.parentElement.style.position = 'relative';
+    f.parentElement.appendChild(ov);
+  });
+}
+function removeIframeOverlay() {
+  document.querySelectorAll('.iframe-drag-overlay').forEach(o => o.remove());
+}
+
+function getScale() {
+  const t = panelsWrap.style.transform;
+  const m = t && t.match(/scale\(([\d.]+)\)/);
+  return m ? parseFloat(m[1]) : 1;
+}
+
+function initResizeX(panelId, handle) {
+  handle.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const panel = getPanel(panelId);
+    const startX = e.clientX;
+    const startW = panel.viewport.w;
+    const scale = getScale();
+    const candidates = getSnapCandidatesX(panel.type);
+    const PAD = 12;
+    const el = panelsWrap.querySelector(`[data-panel-id="${panelId}"]`);
+    const win = el?.querySelector('.browser-win');
+    const iframe = el?.querySelector('iframe');
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+    addIframeOverlay();
+
+    function onMove(ev) {
+      const raw = Math.round(Math.max(200, startW + (ev.clientX - startX) / scale));
+      const snapped = snapValue(raw, candidates);
+      const inSnap = snapped !== raw;
+      const w = inSnap ? snapped : raw;
+      if (el)     el.style.flex = `0 0 ${w + PAD * 2}px`;
+      if (win)    win.style.width = w + 'px';
+      if (iframe) { iframe.style.width = w + 'px'; iframe.style.minWidth = w + 'px'; iframe.style.maxWidth = w + 'px'; }
+      if (inSnap) showSnapLine(panelId, 'x'); else hideSnapLine();
+      showResizeTooltip(ev.clientX, ev.clientY, `${w} × ${panel.viewport.h}`);
+    }
+
+    function onUp(ev) {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      removeIframeOverlay();
+      hideResizeTooltip();
+      hideSnapLine();
+      const raw = Math.round(Math.max(200, startW + (ev.clientX - startX) / scale));
+      panel.viewport.w = snapValue(raw, candidates);
+      refreshPanel(panelId);
+      applyAutoScale();
+      saveState();
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
+function initResizeY(panelId, handle) {
+  handle.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const panel = getPanel(panelId);
+    const startY = e.clientY;
+    const startH = panel.viewport.h;
+    const candidates = getSnapCandidatesY();
+    const scale = getScale();
+    const el = panelsWrap.querySelector(`[data-panel-id="${panelId}"]`);
+    const win = el?.querySelector('.browser-win');
+    const iframe = el?.querySelector('iframe');
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+    addIframeOverlay();
+
+    function onMove(ev) {
+      const raw = Math.round(Math.max(400, startH + (ev.clientY - startY) / scale));
+      const snapped = snapValue(raw, candidates);
+      const inSnap = snapped !== raw;
+      const h = inSnap ? snapped : raw;
+      if (win)    win.style.height = h + 'px';
+      if (iframe) iframe.style.height = h + 'px';
+      if (inSnap) showSnapLine(panelId, 'y'); else hideSnapLine();
+      showResizeTooltip(ev.clientX, ev.clientY, `${panel.viewport.w} × ${h}`);
+    }
+
+    function onUp(ev) {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      removeIframeOverlay();
+      hideResizeTooltip();
+      hideSnapLine();
+      const raw = Math.round(Math.max(400, startH + (ev.clientY - startY) / scale));
+      panel.viewport.h = snapValue(raw, candidates);
+      refreshPanel(panelId);
+      applyAutoScale();
+      saveState();
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
 }
 
 // ── Panel drag-to-reorder ─────────────────────────────────────────────────────
