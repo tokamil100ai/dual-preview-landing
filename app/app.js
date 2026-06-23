@@ -1,6 +1,8 @@
 // ── Presets ───────────────────────────────────────────────────────────────────
 
-const NEW_TAB_HOME = 'https://kamil-lukasiewicz.lovable.app';
+const NEW_TAB_HOME         = 'https://kamil-lukasiewicz.lovable.app';
+const NEW_TAB_HOME_MOBILE  = 'https://kamil-lukasiewicz.lovable.app/wtyczka/mobile';
+const NEW_TAB_HOME_DESKTOP = 'https://kamil-lukasiewicz.lovable.app/wtyczka/desktop';
 
 const MOBILE_PRESETS = [
   { label: 'iPhone X / 11 / 12 / 13', w: 375, h: 812 },
@@ -1272,7 +1274,7 @@ function makeIframe(panel) {
     loadIntoIframe(panel, iframe, tab.url);
   } else {
     if (panel.type === 'mobile') sendBg({ type: 'db-clear-ua', devId: panel.devId });
-    iframe.src = NEW_TAB_HOME;
+    iframe.src = panel.type === 'mobile' ? NEW_TAB_HOME_MOBILE : NEW_TAB_HOME_DESKTOP;
   }
   return iframe;
 }
