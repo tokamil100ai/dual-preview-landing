@@ -464,16 +464,6 @@ function makeIframe(panel) {
   iframe.style.height = panel.viewport.h + 'px';
   iframe.style.display = 'block';
   iframe.style.border = 'none';
-  // Sandbox WITHOUT allow-top-navigation: nothing inside the iframe (including
-  // nested ad frames) can navigate our extension page away — the user is never
-  // thrown out of the plugin. target=_blank anchors are intercepted by emulate.js
-  // and reopened as new tabs in this mini-browser; escape-sandbox only affects
-  // rare programmatic window.open popups.
-  iframe.setAttribute('sandbox',
-    'allow-forms allow-modals allow-orientation-lock allow-pointer-lock ' +
-    'allow-popups allow-popups-to-escape-sandbox allow-presentation ' +
-    'allow-same-origin allow-scripts allow-downloads'
-  );
   iframe.onload = () => {
     try {
       const title = iframe.contentDocument?.title;
