@@ -195,6 +195,9 @@ html, body {
 }
 
 .tab:not(.active):hover { background: rgba(255,255,255,.3); border-radius: 8px 8px 0 0; }
+.tab.tab-dragging { opacity: .4; }
+.tab.tab-drop-before { box-shadow: -2px 0 0 0 var(--accent); }
+.tab.tab-drop-after  { box-shadow:  2px 0 0 0 var(--accent); }
 
 /* ── Active tab ─────────────────────────────────────────────── */
 .tab.active {

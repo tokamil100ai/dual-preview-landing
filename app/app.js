@@ -373,6 +373,42 @@ function makeTabEl(panel, tab) {
 
   el.appendChild(content);
   el.onclick = () => switchTab(panel.id, tab.id);
+
+  el.draggable = true;
+  el.addEventListener('dragstart', (e) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', tab.id);
+    setTimeout(() => el.classList.add('tab-dragging'), 0);
+  });
+  el.addEventListener('dragend', () => el.classList.remove('tab-dragging'));
+  el.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const r = el.getBoundingClientRect();
+    el.classList.toggle('tab-drop-before', e.clientX < r.left + r.width / 2);
+    el.classList.toggle('tab-drop-after',  e.clientX >= r.left + r.width / 2);
+  });
+  el.addEventListener('dragleave', () => {
+    el.classList.remove('tab-drop-before', 'tab-drop-after');
+  });
+  el.addEventListener('drop', (e) => {
+    e.preventDefault();
+    el.classList.remove('tab-drop-before', 'tab-drop-after');
+    const fromId = e.dataTransfer.getData('text/plain');
+    if (fromId === tab.id) return;
+    const p = getPanel(panel.id);
+    const fromIdx = p.tabs.findIndex(t => t.id === fromId);
+    let toIdx = p.tabs.findIndex(t => t.id === tab.id);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const r = el.getBoundingClientRect();
+    if (e.clientX >= r.left + r.width / 2) toIdx++;
+    if (toIdx > fromIdx) toIdx--;
+    const [moved] = p.tabs.splice(fromIdx, 1);
+    p.tabs.splice(toIdx, 0, moved);
+    refreshPanel(panel.id);
+    saveState();
+  });
+
   return el;
 }
 
