@@ -424,11 +424,11 @@ function makeUrlbar(panel) {
   const bar = document.createElement('div');
   bar.className = 'urlbar';
 
-  const back = navBtn(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>`, 'Wstecz');
+  const back = navBtn(`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`, 'Wstecz');
   back.disabled = !tab || tab.histIdx <= 0;
   back.onclick = () => navBack(panel.id);
 
-  const fwd = navBtn(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`, 'Naprzód');
+  const fwd = navBtn(`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>`, 'Naprzód');
   fwd.disabled = !tab || tab.histIdx >= tab.history.length - 1;
   fwd.onclick = () => navForward(panel.id);
 
