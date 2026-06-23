@@ -103,6 +103,11 @@ async function resolveMobileUrl(url) {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
+  if (msg.type === 'db-clear-dpl-cookie') {
+    chrome.cookies.remove({ url: 'https://' + NEW_TAB_HOME_HOST, name: '__dpl' }, () => sendResponse({ ok: true }));
+    return true;
+  }
+
   if (msg.type === 'set-panel-mute') {
     const tabId = sender.tab?.id;
     if (tabId) chrome.tabs.update(tabId, { muted: msg.muted });

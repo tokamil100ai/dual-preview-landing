@@ -10,7 +10,8 @@
     "scripting",
     "storage",
     "tabs",
-    "history"
+    "history",
+    "cookies"
   ],
   "host_permissions": [
     "<all_urls>"
