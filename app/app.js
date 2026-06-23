@@ -168,7 +168,7 @@ function openScalingModal() {
 
   box.innerHTML = `
     <div class="modal-header">
-      <span class="modal-title">Panel scaling</span>
+      <span class="modal-title">Scaling</span>
       <button class="modal-close" id="scaling-close">×</button>
     </div>
     <div class="scaling-options" id="scaling-options"></div>
@@ -1328,7 +1328,7 @@ function openPanelMenu(panelId, anchor) {
 
   const extItems = [
     { icon: svgBgIcon(),     label: 'Background',    fn: () => openBgPicker() },
-    { icon: svgScaleIcon(),  label: 'Panel scaling',  fn: () => openScalingModal() },
+    { icon: svgScaleIcon(),  label: 'Scaling',  fn: () => openScalingModal() },
   ];
 
   function addSection(label, sectionItems) {
