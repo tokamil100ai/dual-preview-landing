@@ -150,7 +150,7 @@ html, body {
 }
 
 .drag-handle {
-  width: 20px;
+  width: 32px;
   height: 100%;
   display: flex; align-items: center; justify-content: center;
   color: #9aa0a6;
@@ -158,11 +158,12 @@ html, body {
   font-size: 15px;
   flex-shrink: 0;
   padding-bottom: 2px;
+  margin: 0 4px;
   border-radius: 4px;
   transition: color 0.15s, background 0.15s;
   z-index: 1;
 }
-.drag-handle:hover { color: #5f6368; background: rgba(0,0,0,0.06); }
+.drag-handle:hover { color: #c4c7cc; background: transparent; }
 .drag-handle:active { cursor: grabbing; }
 
 /* tabs area */
