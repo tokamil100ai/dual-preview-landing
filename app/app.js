@@ -16,6 +16,138 @@ const DESKTOP_PRESETS = [
   { label: '1920px', w: 1920, h: 900 },
 ];
 
+// ── Background ────────────────────────────────────────────────────────────────
+
+const BG_IMAGES = [
+  { id: 'mojave-night', label: 'Mojave Night', src: '../assets/bg/mojave-night.jpg' },
+];
+
+const BG_COLORS = [
+  '#ffffff', '#f5f5f5', '#e8eaed', '#2d2d2d', '#1a1a1a',  // whites → grays → dark
+  '#16213e', '#0f3460', '#1a1a2e',                          // navy blues
+  '#1b4332', '#1a0533', '#3d0000',                          // deep greens / purples / reds
+];
+
+function applyBackground(bg) {
+  if (!bg || bg.type === 'default') {
+    document.body.style.background = '';
+    document.body.style.backgroundSize = '';
+  } else if (bg.type === 'color') {
+    document.body.style.background = bg.value;
+    document.body.style.backgroundSize = '';
+  } else if (bg.type === 'image') {
+    document.body.style.background = `url('${bg.value}') center/cover no-repeat fixed`;
+  }
+}
+
+function saveBackground(bg) {
+  chrome.storage.local.set({ bg });
+  applyBackground(bg);
+}
+
+function loadBackground() {
+  chrome.storage.local.get('bg', ({ bg }) => { if (bg) applyBackground(bg); });
+}
+
+function openBgPicker() {
+  const existing = document.getElementById('bg-modal');
+  if (existing) { existing.remove(); return; }
+
+  // Remember original so we can revert on cancel.
+  let originalBg;
+  chrome.storage.local.get('bg', ({ bg }) => { originalBg = bg || { type: 'default' }; });
+
+  let pendingBg = null;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'bg-modal';
+  overlay.className = 'modal-overlay';
+  const close = () => { applyBackground(originalBg || { type: 'default' }); overlay.remove(); };
+  overlay.onclick = e => { if (e.target === overlay) close(); };
+
+  const box = document.createElement('div');
+  box.className = 'modal-box bg-picker-box';
+  box.onclick = e => e.stopPropagation();
+
+  box.innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">Background</span>
+      <button class="modal-close" id="bg-close">×</button>
+    </div>
+    <div class="bg-section-label">Solid color</div>
+    <div class="bg-colors" id="bg-colors"></div>
+    <label class="bg-custom-color-wrap" id="bg-custom-wrap">
+      <span>Custom</span>
+      <input type="color" id="bg-color-custom" value="#e8eaed">
+    </label>
+    <div class="bg-section-label" style="margin-top:14px">Wallpaper</div>
+    <div class="bg-images" id="bg-images"></div>
+    <div class="bg-section-label" style="margin-top:14px">Reset</div>
+    <button class="bg-reset-row" id="bg-reset">Reset to default</button>
+    <div class="bg-footer">
+      <button class="bg-save-btn" id="bg-save">Save</button>
+    </div>
+  `;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  const markSelected = (type, value) => {
+    box.querySelectorAll('.bg-color-swatch').forEach(s => s.classList.toggle('selected', type === 'color' && s.dataset.color === value));
+    box.querySelectorAll('.bg-image-thumb').forEach(s => s.classList.toggle('selected', type === 'image' && s.dataset.src === value));
+    const isCustom = type === 'color' && !BG_COLORS.includes(value);
+    const customWrap = box.querySelector('#bg-custom-wrap');
+    if (customWrap) {
+      customWrap.classList.toggle('selected', isCustom);
+      if (isCustom) box.querySelector('#bg-color-custom').value = value;
+    }
+  };
+
+  const preview = (bg) => { pendingBg = bg; applyBackground(bg); markSelected(bg.type, bg.value); };
+
+  document.getElementById('bg-close').onclick = close;
+
+  // Pre-mark current selection once storage resolves.
+  chrome.storage.local.get('bg', ({ bg }) => {
+    if (bg) markSelected(bg.type, bg.value);
+  });
+
+  const colorsEl = document.getElementById('bg-colors');
+  BG_COLORS.forEach(c => {
+    const sw = document.createElement('button');
+    sw.className = 'bg-color-swatch';
+    sw.dataset.color = c;
+    sw.style.background = c;
+    sw.title = c;
+    sw.onclick = () => preview({ type: 'color', value: c });
+    colorsEl.appendChild(sw);
+  });
+
+  document.getElementById('bg-color-custom').oninput = e => {
+    preview({ type: 'color', value: e.target.value });
+  };
+
+  const imagesEl = document.getElementById('bg-images');
+  BG_IMAGES.forEach(img => {
+    const btn = document.createElement('button');
+    btn.className = 'bg-image-thumb';
+    btn.title = img.label;
+    btn.dataset.src = img.src;
+    btn.style.backgroundImage = `url('${img.src}')`;
+    btn.onclick = () => preview({ type: 'image', value: img.src });
+    const lbl = document.createElement('span');
+    lbl.textContent = img.label;
+    btn.appendChild(lbl);
+    imagesEl.appendChild(btn);
+  });
+
+  document.getElementById('bg-reset').onclick = () => preview({ type: 'default' });
+
+  document.getElementById('bg-save').onclick = () => {
+    if (pendingBg) saveBackground(pendingBg);
+    overlay.remove();
+  };
+}
+
 // ── State ─────────────────────────────────────────────────────────────────────
 
 let _pid = 0, _tid = 0;
@@ -1128,31 +1260,36 @@ function openPanelMenu(panelId, anchor) {
   menu.className = 'dropdown';
   activeDropdown = menu;
 
-  const items = [
+  const panelItems = [
     state.panels.length > 1 ? { icon: svgClose(), label: 'Close', danger: true, fn: () => removePanel(panelId) } : null,
-    { icon: svgDup(),   label: 'Duplicate',                                 fn: () => duplicatePanel(panelId) },
-    null,
-    { icon: svgQr(),    label: 'Create QR code for this URL',               fn: () => showQR(tab?.url) },
-    { icon: svgSwitch(),label: panel.type === 'mobile' ? 'Switch to desktop' : 'Switch to mobile', fn: () => switchPanelType(panelId) },
-    { icon: svgSpeed(), label: 'Open in PageSpeed Insights',                fn: () => tab?.url && window.open('https://pagespeed.web.dev/report?url=' + encodeURIComponent(tab.url), '_blank') },
+    { icon: svgDup(),    label: 'Duplicate',                fn: () => duplicatePanel(panelId) },
+    { icon: svgQr(),     label: 'Create QR code',           fn: () => showQR(tab?.url) },
+    { icon: svgSwitch(), label: panel.type === 'mobile' ? 'Switch to desktop' : 'Switch to mobile', fn: () => switchPanelType(panelId) },
+    { icon: svgSpeed(),  label: 'Open in PageSpeed',        fn: () => tab?.url && window.open('https://pagespeed.web.dev/report?url=' + encodeURIComponent(tab.url), '_blank') },
+  ].filter(Boolean);
+
+  const extItems = [
+    { icon: svgBgIcon(), label: 'Background', fn: () => openBgPicker() },
   ];
 
-  // Remove leading/trailing separators (nulls) to avoid orphan lines.
-  const trimmed = items.filter((x, i, a) => {
-    if (x !== null) return true;
-    const prev = a.slice(0, i).findLast(v => v !== null);
-    const next = a.slice(i + 1).find(v => v !== null);
-    return !!prev && !!next;
-  });
-  trimmed.forEach(item => {
-    if (!item) { const s = document.createElement('div'); s.className = 'dropdown-sep'; menu.appendChild(s); return; }
-    const el = document.createElement('div');
-    el.className = 'dropdown-item' + (item.danger ? ' danger' : '');
-    el.innerHTML = item.icon;
-    el.appendChild(Object.assign(document.createElement('span'), { textContent: item.label }));
-    el.onclick = () => { closeAllDropdowns(); item.fn(); };
-    menu.appendChild(el);
-  });
+  function addSection(label, sectionItems) {
+    const hdr = document.createElement('div');
+    hdr.className = 'dropdown-section-label';
+    hdr.textContent = label;
+    menu.appendChild(hdr);
+    sectionItems.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'dropdown-item' + (item.danger ? ' danger' : '');
+      el.innerHTML = item.icon;
+      el.appendChild(Object.assign(document.createElement('span'), { textContent: item.label }));
+      el.onclick = () => { closeAllDropdowns(); item.fn(); };
+      menu.appendChild(el);
+    });
+  }
+
+  addSection('Panel', panelItems);
+  const sep = document.createElement('div'); sep.className = 'dropdown-sep'; menu.appendChild(sep);
+  addSection('Extension', extItems);
 
   document.body.appendChild(menu);
   const r = anchor.getBoundingClientRect();
@@ -1303,12 +1440,14 @@ function svgQr()     { return `<svg viewBox="0 0 24 24" fill="none" stroke="curr
 function svgSwitch() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>`; }
 function svgCam()    { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>`; }
 function svgSpeed()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`; }
+function svgBgIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`; }
 function svgTrash()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>`; }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
 // loadState(); — disabled: always start with default panels
 
+loadBackground();
 applyPermalink();
 render();
 
