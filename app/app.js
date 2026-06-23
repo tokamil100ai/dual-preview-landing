@@ -1052,6 +1052,33 @@ function makeUrlbar(panel) {
     if (_suggIdx >= 0) input.value = _sugg[_suggIdx].url;
   }
 
+  // Returns true if query matches the item the same way Chrome omnibox does:
+  // prefix match against hostname segments, path segments, or title words.
+  function matchesSugg(item, q) {
+    const lq = q.toLowerCase();
+    try {
+      const u = new URL(item.url);
+      const host = u.hostname.replace(/^www\./, '');
+      // bare URL without protocol/www — "antyweb.pl/some-path"
+      const bare = (host + u.pathname + u.search).toLowerCase();
+      // Match if bare URL or hostname starts with query
+      if (bare.startsWith(lq) || host.startsWith(lq)) return true;
+      // Match if any segment (split by . / - _) starts with query (min 2 chars to avoid noise)
+      if (lq.length >= 2) {
+        const segments = bare.split(/[./\-_?=&]/);
+        if (segments.some(s => s && s.startsWith(lq))) return true;
+      }
+      // Match title prefix (min 2 chars)
+      if (lq.length >= 2 && item.title) {
+        const words = item.title.toLowerCase().split(/\s+/);
+        if (words.some(w => w.startsWith(lq))) return true;
+      }
+    } catch(e) {
+      return item.url.toLowerCase().startsWith(lq);
+    }
+    return false;
+  }
+
   input.oninput = () => {
     const q = input.value.trim();
     if (!q) { hideSuggestions(); return; }
@@ -1059,15 +1086,17 @@ function makeUrlbar(panel) {
     const q2 = dotIdx > 0 ? q.slice(0, dotIdx) : null;
     const seen = new Set();
     const merge = (a, b) => {
-      const all = [...(a || []), ...(b || [])].filter(r => r.url && !seen.has(r.url) && seen.add(r.url));
+      const all = [...(a || []), ...(b || [])]
+        .filter(r => r.url && !seen.has(r.url) && seen.add(r.url))
+        .filter(r => matchesSugg(r, q));
       renderSuggestions(all.slice(0, 8).map(r => ({ url: r.url, title: r.title })));
     };
     if (q2) {
-      chrome.history.search({ text: q, maxResults: 8, startTime: 0 }, (r1) => {
-        chrome.history.search({ text: q2, maxResults: 8, startTime: 0 }, (r2) => merge(r1, r2));
+      chrome.history.search({ text: q, maxResults: 50, startTime: 0 }, (r1) => {
+        chrome.history.search({ text: q2, maxResults: 50, startTime: 0 }, (r2) => merge(r1, r2));
       });
     } else {
-      chrome.history.search({ text: q, maxResults: 8, startTime: 0 }, (r) => merge(r, []));
+      chrome.history.search({ text: q, maxResults: 50, startTime: 0 }, (r) => merge(r, []));
     }
   };
 
@@ -1276,14 +1305,10 @@ async function loadIntoIframe(panel, iframe, url) {
     iframe.src = buildSrc(panel, url);
     return;
   }
-  // Preflight resolves redirect destination. DNR rule is either hostname-based
-  // (redirect detected) or token-based (__dbid in URL, no redirect).
   const resp = await sendBg({ type: 'db-mobile-ua', devId: panel.devId, url });
   const finalUrl = resp?.url || url;
   _suppressHistory.add(key);
-  // Redirected: load final URL (e.g. m.wp.pl) directly — DNR matches its hostname.
-  // Not redirected: load with token so DNR can match __dbid uniquely per panel.
-  iframe.src = resp?.redirected ? finalUrl : buildSrc(panel, finalUrl);
+  iframe.src = finalUrl;
 }
 
 // ── Divider ───────────────────────────────────────────────────────────────────
