@@ -148,6 +148,57 @@ function openBgPicker() {
   };
 }
 
+function openScalingModal() {
+  const existing = document.getElementById('scaling-modal');
+  if (existing) { existing.remove(); return; }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'scaling-modal';
+  overlay.className = 'modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  const box = document.createElement('div');
+  box.className = 'modal-box scaling-box';
+  box.onclick = e => e.stopPropagation();
+
+  const options = [
+    { value: 'fit',  label: 'Scale to fit',   desc: 'Panels shrink to fit the window. Nothing is cut off.' },
+    { value: 'real', label: '100% real size',  desc: 'Panels always show at full pixel size. Scroll horizontally if needed.' },
+  ];
+
+  box.innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">Panel scaling</span>
+      <button class="modal-close" id="scaling-close">×</button>
+    </div>
+    <div class="scaling-options" id="scaling-options"></div>
+  `;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  document.getElementById('scaling-close').onclick = () => overlay.remove();
+
+  const optionsEl = document.getElementById('scaling-options');
+  options.forEach(opt => {
+    const row = document.createElement('label');
+    row.className = 'scaling-row' + (state.scaling === opt.value ? ' selected' : '');
+    row.innerHTML = `
+      <input type="radio" name="scaling" value="${opt.value}" ${state.scaling === opt.value ? 'checked' : ''}>
+      <div class="scaling-row-text">
+        <span class="scaling-row-label">${opt.label}</span>
+        <span class="scaling-row-desc">${opt.desc}</span>
+      </div>
+    `;
+    row.querySelector('input').onchange = () => {
+      state.scaling = opt.value;
+      optionsEl.querySelectorAll('.scaling-row').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+      applyAutoScale();
+    };
+    optionsEl.appendChild(row);
+  });
+}
+
 // ── State ─────────────────────────────────────────────────────────────────────
 
 let _pid = 0, _tid = 0;
@@ -181,6 +232,7 @@ function sendBg(msg) {
 const state = {
   panels: [makePanel('mobile'), makePanel('desktop')],
   sync: false,
+  scaling: 'fit',
 };
 
 function getPanel(id) { return state.panels.find(p => p.id === id); }
@@ -232,6 +284,12 @@ function applyAutoScale() {
   panelsWrap.style.transform  = '';
   panelsWrap.style.height     = '';
   panelsWrap.style.marginLeft = '';
+
+  if (state.scaling === 'real') {
+    document.body.style.overflowX = 'auto';
+    return;
+  }
+  document.body.style.overflowX = 'hidden';
 
   const availW   = window.innerWidth;
   const availH   = window.innerHeight - (panelsWrap.offsetTop || 0);
@@ -1269,7 +1327,8 @@ function openPanelMenu(panelId, anchor) {
   ].filter(Boolean);
 
   const extItems = [
-    { icon: svgBgIcon(), label: 'Background', fn: () => openBgPicker() },
+    { icon: svgBgIcon(),     label: 'Background',    fn: () => openBgPicker() },
+    { icon: svgScaleIcon(),  label: 'Panel scaling',  fn: () => openScalingModal() },
   ];
 
   function addSection(label, sectionItems) {
@@ -1289,7 +1348,7 @@ function openPanelMenu(panelId, anchor) {
 
   addSection('Panel', panelItems);
   const sep = document.createElement('div'); sep.className = 'dropdown-sep'; menu.appendChild(sep);
-  addSection('Extension', extItems);
+  addSection('General settings', extItems);
 
   document.body.appendChild(menu);
   const r = anchor.getBoundingClientRect();
@@ -1440,7 +1499,8 @@ function svgQr()     { return `<svg viewBox="0 0 24 24" fill="none" stroke="curr
 function svgSwitch() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>`; }
 function svgCam()    { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>`; }
 function svgSpeed()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`; }
-function svgBgIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`; }
+function svgBgIcon()    { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`; }
+function svgScaleIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`; }
 function svgTrash()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>`; }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
