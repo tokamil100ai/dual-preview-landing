@@ -76,43 +76,33 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.type === 'db-mobile-ua') {
-    // Register a DNR rule per-hostname so the iframe request gets iPhone UA.
-    // ||hostname matches the domain AND all its subdomains (www., m., etc.)
-    // so a single rule covers trojmiasto.pl → www.trojmiasto.pl → m.trojmiasto.pl.
-    let hostname = '';
-    try {
-      hostname = new URL(msg.url).hostname.replace(/^www\./, '');
-    } catch (e) {}
+    // Preflight: fetch URL with iPhone UA to resolve mobile redirect destination.
+    // Register DNR rule for the FINAL hostname (e.g. m.wp.pl) not the original
+    // (wp.pl) — this way a desktop panel on wp.pl is unaffected by the rule.
+    (async () => {
+      const finalUrl = await resolveMobileUrl(msg.url);
+      const redirected = (() => {
+        try { return new URL(finalUrl).hostname !== new URL(msg.url).hostname; } catch(e) { return false; }
+      })();
 
-    let ruleId = devRuleId.get(msg.devId);
-    if (!ruleId) { ruleId = nextRuleId++; devRuleId.set(msg.devId, ruleId); }
+      let ruleId = devRuleId.get(msg.devId);
+      if (!ruleId) { ruleId = nextRuleId++; devRuleId.set(msg.devId, ruleId); }
 
-    chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: [ruleId],
-      addRules: [{
-        id: ruleId,
-        priority: 2,
-        action: {
-          type: 'modifyHeaders',
-          requestHeaders: [
-            { header: 'User-Agent', operation: 'set', value: MOBILE_UA },
-          ],
-        },
-        condition: {
-          urlFilter: '||' + hostname,
-          resourceTypes: ['main_frame', 'sub_frame'],
-        },
-      }],
-    }, () => {
-      if (chrome.runtime.lastError) {
-        console.error('[DB] DNR register FAILED:', chrome.runtime.lastError.message);
-      } else {
-        chrome.declarativeNetRequest.getDynamicRules(rules => {
-          console.log('[DB] active rules:', rules.map(r => ({ id: r.id, urlf: r.condition?.urlFilter })));
-        });
-      }
-      sendResponse({ ok: true });
-    });
+      // Redirected (e.g. wp.pl → m.wp.pl): match mobile hostname — desktop on wp.pl unaffected.
+      // Not redirected (responsive site): match unique devId token in URL — only mobile panel
+      // embeds this token, desktop panel never does.
+      const condition = redirected
+        ? { urlFilter: '||' + new URL(finalUrl).hostname.replace(/^www\./, ''), resourceTypes: ['main_frame', 'sub_frame'] }
+        : { urlFilter: '__dbid=' + msg.devId, resourceTypes: ['main_frame', 'sub_frame'] };
+
+      chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [ruleId],
+        addRules: [{ id: ruleId, priority: 2, action: { type: 'modifyHeaders', requestHeaders: [{ header: 'User-Agent', operation: 'set', value: MOBILE_UA }] }, condition }],
+      }, () => {
+        if (chrome.runtime.lastError) console.error('[DB] DNR FAILED:', chrome.runtime.lastError.message);
+        sendResponse({ ok: true, url: finalUrl, redirected });
+      });
+    })();
     return true;
   }
 

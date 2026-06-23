@@ -348,11 +348,26 @@ function makeTabEl(panel, tab) {
   title.textContent = tab.title || 'New Tab';
   content.appendChild(title);
 
-  if (panel.tabs.length > 1) {
+  const canClose = panel.tabs.length > 1 || !!tab.url;
+  if (canClose) {
     const close = document.createElement('span');
     close.className = 'tab-close';
     close.textContent = '×';
-    close.onclick = (e) => { e.stopPropagation(); closeTab(panel.id, tab.id); };
+    close.onclick = (e) => {
+      e.stopPropagation();
+      if (panel.tabs.length > 1) {
+        closeTab(panel.id, tab.id);
+      } else {
+        // Reset sole tab to blank new-tab state instead of closing panel.
+        tab.url = '';
+        tab.title = 'New Tab';
+        tab.favicon = null;
+        tab.history = [];
+        tab.histIdx = 0;
+        refreshPanel(panel.id);
+        saveState();
+      }
+    };
     content.appendChild(close);
   }
 
@@ -424,15 +439,136 @@ function makeUrlbar(panel) {
   bar.appendChild(fwd);
   bar.appendChild(reload);
 
+  const inputWrap = document.createElement('div');
+  inputWrap.className = 'url-input-wrap';
+
   const input = document.createElement('input');
   input.className = 'url-input';
   input.type = 'text';
   input.value = tab ? tab.url : '';
   input.placeholder = 'Wpisz adres lub wyszukaj…';
   input.spellcheck = false;
-  input.onkeydown = (e) => { if (e.key === 'Enter') navigate(panel.id, input.value); };
-  input.onfocus = () => input.select();
-  bar.appendChild(input);
+  input.autocomplete = 'off';
+
+  const suggestions = document.createElement('div');
+  suggestions.className = 'url-suggestions';
+
+  let _sugg = [];
+  let _suggIdx = -1;
+
+  function hideSuggestions() {
+    suggestions.innerHTML = '';
+    suggestions.style.display = 'none';
+    _sugg = [];
+    _suggIdx = -1;
+  }
+
+  function selectSuggestion(url) {
+    input.value = url;
+    hideSuggestions();
+    navigate(panel.id, url);
+  }
+
+  function renderSuggestions(items) {
+    suggestions.innerHTML = '';
+    _sugg = items;
+    _suggIdx = -1;
+    if (!items.length) { suggestions.style.display = 'none'; return; }
+    items.forEach((item, i) => {
+      const row = document.createElement('div');
+      row.className = 'url-sugg-row';
+
+      const favicon = document.createElement('img');
+      favicon.className = 'url-sugg-favicon';
+      try {
+        favicon.src = 'https://www.google.com/s2/favicons?sz=32&domain_url=' + encodeURIComponent(new URL(item.url).origin);
+      } catch(e) {}
+      favicon.onerror = () => {
+        favicon.style.display = 'none';
+        const fallback = document.createElement('span');
+        fallback.className = 'url-sugg-favicon-fallback';
+        row.insertBefore(fallback, favicon.nextSibling);
+      };
+
+      const label = document.createElement('span');
+      label.className = 'url-sugg-label';
+      if (item.title) {
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'url-sugg-name';
+        titleSpan.textContent = item.title;
+        const sep = document.createElement('span');
+        sep.className = 'url-sugg-sep';
+        sep.textContent = ' — ';
+        const urlSpan = document.createElement('span');
+        urlSpan.className = 'url-sugg-url';
+        urlSpan.textContent = item.url;
+        label.appendChild(titleSpan);
+        label.appendChild(sep);
+        label.appendChild(urlSpan);
+      } else {
+        const urlSpan = document.createElement('span');
+        urlSpan.className = 'url-sugg-url';
+        urlSpan.textContent = item.url;
+        label.appendChild(urlSpan);
+      }
+
+      row.appendChild(favicon);
+      row.appendChild(label);
+      row.onmousedown = (e) => { e.preventDefault(); selectSuggestion(item.url); };
+      row.onmouseover = () => { _suggIdx = i; highlightSuggestion(); };
+      suggestions.appendChild(row);
+    });
+    suggestions.style.display = 'block';
+  }
+
+  function highlightSuggestion() {
+    [...suggestions.children].forEach((el, i) => el.classList.toggle('active', i === _suggIdx));
+    if (_suggIdx >= 0) input.value = _sugg[_suggIdx].url;
+  }
+
+  input.oninput = () => {
+    const q = input.value.trim();
+    if (!q) { hideSuggestions(); return; }
+    const dotIdx = q.lastIndexOf('.');
+    const q2 = dotIdx > 0 ? q.slice(0, dotIdx) : null;
+    const seen = new Set();
+    const merge = (a, b) => {
+      const all = [...(a || []), ...(b || [])].filter(r => r.url && !seen.has(r.url) && seen.add(r.url));
+      renderSuggestions(all.slice(0, 8).map(r => ({ url: r.url, title: r.title })));
+    };
+    if (q2) {
+      chrome.history.search({ text: q, maxResults: 8, startTime: 0 }, (r1) => {
+        chrome.history.search({ text: q2, maxResults: 8, startTime: 0 }, (r2) => merge(r1, r2));
+      });
+    } else {
+      chrome.history.search({ text: q, maxResults: 8, startTime: 0 }, (r) => merge(r, []));
+    }
+  };
+
+  input.onkeydown = (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _suggIdx = Math.min(_suggIdx + 1, _sugg.length - 1);
+      highlightSuggestion();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _suggIdx = Math.max(_suggIdx - 1, -1);
+      highlightSuggestion();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      hideSuggestions();
+      navigate(panel.id, input.value);
+    } else if (e.key === 'Escape') {
+      hideSuggestions();
+    }
+  };
+
+  input.onfocus = () => { input.select(); };
+  input.onblur = () => { setTimeout(hideSuggestions, 150); };
+
+  inputWrap.appendChild(input);
+  inputWrap.appendChild(suggestions);
+  bar.appendChild(inputWrap);
 
 
   return bar;
@@ -580,6 +716,7 @@ function makeIframe(panel) {
   if (tab.url) {
     loadIntoIframe(panel, iframe, tab.url);
   } else {
+    if (panel.type === 'mobile') sendBg({ type: 'db-clear-ua', devId: panel.devId });
     const page = makeNewTabPage(panel);
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
 <style>*{margin:0;padding:0;box-sizing:border-box}
@@ -628,12 +765,14 @@ async function loadIntoIframe(panel, iframe, url) {
     iframe.src = buildSrc(panel, url);
     return;
   }
-  // Register DNR rule (hostname-based) so every request to this domain gets
-  // iPhone UA. Load a clean URL — no token params — so server-side redirects
-  // (e.g. trojmiasto.pl → m.trojmiasto.pl) work correctly.
-  await sendBg({ type: 'db-mobile-ua', devId: panel.devId, url });
+  // Preflight resolves redirect destination. DNR rule is either hostname-based
+  // (redirect detected) or token-based (__dbid in URL, no redirect).
+  const resp = await sendBg({ type: 'db-mobile-ua', devId: panel.devId, url });
+  const finalUrl = resp?.url || url;
   _suppressHistory.add(key);
-  iframe.src = url;
+  // Redirected: load final URL (e.g. m.wp.pl) directly — DNR matches its hostname.
+  // Not redirected: load with token so DNR can match __dbid uniquely per panel.
+  iframe.src = resp?.redirected ? finalUrl : buildSrc(panel, finalUrl);
 }
 
 // ── Divider ───────────────────────────────────────────────────────────────────
@@ -965,7 +1104,6 @@ function openPanelMenu(panelId, anchor) {
     { icon: svgQr(),    label: 'Create QR code for this URL',               fn: () => showQR(tab?.url) },
     { icon: svgSwitch(),label: panel.type === 'mobile' ? 'Switch to desktop' : 'Switch to mobile', fn: () => switchPanelType(panelId) },
     { icon: svgSpeed(), label: 'Open in PageSpeed Insights',                fn: () => tab?.url && window.open('https://pagespeed.web.dev/report?url=' + encodeURIComponent(tab.url), '_blank') },
-    { icon: svgTrash(), label: 'Clear cookies and local storage',           fn: () => clearStorage(panelId) },
   ];
 
   // Remove leading/trailing separators (nulls) to avoid orphan lines.
