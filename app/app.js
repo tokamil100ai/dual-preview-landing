@@ -1,5 +1,7 @@
 // ── Presets ───────────────────────────────────────────────────────────────────
 
+const NEW_TAB_HOME = 'https://kamil-lukasiewicz.lovable.app';
+
 const MOBILE_PRESETS = [
   { label: 'iPhone X / 11 / 12 / 13', w: 375, h: 812 },
   { label: 'iPhone 14',         w: 390, h: 844 },
@@ -482,7 +484,7 @@ function makeUrlbar(panel) {
   input.className = 'url-input';
   input.type = 'text';
   input.value = tab ? tab.url : '';
-  input.placeholder = 'Wpisz adres lub wyszukaj…';
+  input.placeholder = 'Search or type a URL';
   input.spellcheck = false;
   input.autocomplete = 'off';
 
@@ -753,22 +755,7 @@ function makeIframe(panel) {
     loadIntoIframe(panel, iframe, tab.url);
   } else {
     if (panel.type === 'mobile') sendBg({ type: 'db-clear-ua', devId: panel.devId });
-    const page = makeNewTabPage(panel);
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>*{margin:0;padding:0;box-sizing:border-box}
-html,body{margin:0;padding:0;width:100%;height:100%;background:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-body{display:flex;flex-direction:column;align-items:center;padding-top:180px}
-.wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:320px;text-align:center}
-.icon{font-size:36px;opacity:.35}
-.label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5f6368;opacity:.6}
-.text{font-size:13px;line-height:1.6;color:#5f6368;opacity:.7}
-</style></head><body>
-<div class="wrap">
-  <span class="icon">${panel.type === 'mobile' ? '📱' : '🖥'}</span>
-  <p class="label">Did you know?</p>
-  <p class="text">${page.querySelector('.new-tab-text').textContent}</p>
-</div></body></html>`;
-    iframe.srcdoc = html;
+    iframe.src = NEW_TAB_HOME;
   }
   return iframe;
 }
@@ -913,6 +900,7 @@ window.addEventListener('message', e => {
   }
 
   if (data.type === 'db-urlchange') {
+    if (!tab.url && url.startsWith(NEW_TAB_HOME)) return;
     // replaceState — update URL bar and title without pushing to history.
     tab.url = url;
     if (data.title) tab.title = data.title;
@@ -922,6 +910,13 @@ window.addEventListener('message', e => {
   }
 
   // db-loaded
+  // When a new tab shows the homepage, don't expose its URL in the address bar.
+  if (!tab.url && url.startsWith(NEW_TAB_HOME)) {
+    if (data.title) tab.title = 'New Tab';
+    if (tab.id === panel.activeTabId) { refreshTabStrip(panelId); }
+    return;
+  }
+
   const _suppKey = panelId + '-' + tabId;
   const _wasSuppressed = _suppressHistory.has(_suppKey);
 
