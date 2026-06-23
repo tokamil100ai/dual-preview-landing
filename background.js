@@ -1,13 +1,33 @@
 const MOBILE_UA       = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
 const MOBILE_PLATFORM = '"iOS"';
 const MOBILE_CH_UA    = '"Not_A Brand";v="8", "Mobile Safari";v="16"';
+const REAL_UA         = navigator.userAgent;
 
+// Rule ID 1 is reserved for the desktop override rule (high priority, permanent).
+const DESKTOP_OVERRIDE_RULE_ID = 1;
 const devRuleId = new Map();
-let nextRuleId = 1000;
+let nextRuleId = 1001;
 
-chrome.runtime.onInstalled.addListener(clearAllDynamicRules);
-chrome.runtime.onStartup.addListener(clearAllDynamicRules);
-clearAllDynamicRules();
+async function initRules() {
+  try {
+    const rules = await chrome.declarativeNetRequest.getDynamicRules();
+    const toRemove = rules.map(r => r.id).filter(id => id !== DESKTOP_OVERRIDE_RULE_ID);
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: [...toRemove, DESKTOP_OVERRIDE_RULE_ID],
+      addRules: [{
+        id: DESKTOP_OVERRIDE_RULE_ID,
+        priority: 100,
+        action: { type: 'modifyHeaders', requestHeaders: [{ header: 'User-Agent', operation: 'set', value: REAL_UA }] },
+        condition: { urlFilter: '__dbid', resourceTypes: ['main_frame', 'sub_frame'] },
+      }],
+    });
+  } catch (e) { console.error('[DB] initRules failed:', e); }
+  devRuleId.clear();
+}
+
+chrome.runtime.onInstalled.addListener(initRules);
+chrome.runtime.onStartup.addListener(initRules);
+initRules();
 
 async function clearAllDynamicRules() {
   try {
@@ -88,12 +108,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       let ruleId = devRuleId.get(msg.devId);
       if (!ruleId) { ruleId = nextRuleId++; devRuleId.set(msg.devId, ruleId); }
 
-      // Redirected (e.g. wp.pl → m.wp.pl): match mobile hostname — desktop on wp.pl unaffected.
-      // Not redirected (responsive site): match unique devId token in URL — only mobile panel
-      // embeds this token, desktop panel never does.
-      const condition = redirected
-        ? { urlFilter: '||' + new URL(finalUrl).hostname.replace(/^www\./, ''), resourceTypes: ['main_frame', 'sub_frame'] }
-        : { urlFilter: '__dbid=' + msg.devId, resourceTypes: ['main_frame', 'sub_frame'] };
+      // Always use hostname-based DNR for the final URL's hostname.
+      // For redirected sites (e.g. trojmiasto.pl → m.trojmiasto.pl): final hostname is m.trojmiasto.pl.
+      // For responsive sites (wp.pl stays wp.pl): hostname is wp.pl.
+      const ruleHostname = new URL(finalUrl).hostname.replace(/^www\./, '');
+      const condition = { urlFilter: '||' + ruleHostname, resourceTypes: ['main_frame', 'sub_frame'] };
 
       chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: [ruleId],
