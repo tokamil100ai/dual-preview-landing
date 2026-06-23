@@ -3,23 +3,37 @@ const MOBILE_PLATFORM = '"iOS"';
 const MOBILE_CH_UA    = '"Not_A Brand";v="8", "Mobile Safari";v="16"';
 const REAL_UA         = navigator.userAgent;
 
-// Rule ID 1 is reserved for the desktop override rule (high priority, permanent).
+// Rule ID 1: desktop UA override. Rule ID 2: no-cache for new tab home. Both permanent.
 const DESKTOP_OVERRIDE_RULE_ID = 1;
+const NO_CACHE_RULE_ID = 2;
+const NEW_TAB_HOME_HOST = 'kamil-lukasiewicz.lovable.app';
 const devRuleId = new Map();
 let nextRuleId = 1001;
 
 async function initRules() {
   try {
     const rules = await chrome.declarativeNetRequest.getDynamicRules();
-    const toRemove = rules.map(r => r.id).filter(id => id !== DESKTOP_OVERRIDE_RULE_ID);
+    const toRemove = rules.map(r => r.id);
     await chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: [...toRemove, DESKTOP_OVERRIDE_RULE_ID],
-      addRules: [{
-        id: DESKTOP_OVERRIDE_RULE_ID,
-        priority: 100,
-        action: { type: 'modifyHeaders', requestHeaders: [{ header: 'User-Agent', operation: 'set', value: REAL_UA }] },
-        condition: { urlFilter: '__dbid', resourceTypes: ['main_frame', 'sub_frame'] },
-      }],
+      removeRuleIds: toRemove,
+      addRules: [
+        {
+          id: DESKTOP_OVERRIDE_RULE_ID,
+          priority: 100,
+          action: { type: 'modifyHeaders', requestHeaders: [{ header: 'User-Agent', operation: 'set', value: REAL_UA }] },
+          condition: { urlFilter: '__dbid', resourceTypes: ['main_frame', 'sub_frame'] },
+        },
+        {
+          id: NO_CACHE_RULE_ID,
+          priority: 1,
+          action: { type: 'modifyHeaders', responseHeaders: [
+            { header: 'Cache-Control', operation: 'set', value: 'no-cache, no-store, must-revalidate' },
+            { header: 'Pragma',        operation: 'set', value: 'no-cache' },
+            { header: 'Expires',       operation: 'set', value: '0' },
+          ]},
+          condition: { requestDomains: [NEW_TAB_HOME_HOST], resourceTypes: ['main_frame', 'sub_frame', 'script', 'stylesheet', 'image', 'xmlhttprequest', 'other'] },
+        },
+      ],
     });
   } catch (e) { console.error('[DB] initRules failed:', e); }
   devRuleId.clear();
