@@ -464,6 +464,11 @@ function makeIframe(panel) {
   iframe.style.height = panel.viewport.h + 'px';
   iframe.style.display = 'block';
   iframe.style.border = 'none';
+  iframe.setAttribute('sandbox',
+    'allow-forms allow-modals allow-orientation-lock allow-pointer-lock ' +
+    'allow-popups allow-popups-to-escape-sandbox allow-presentation ' +
+    'allow-same-origin allow-scripts allow-downloads'
+  );
   iframe.onload = () => {
     try {
       const title = iframe.contentDocument?.title;
@@ -670,6 +675,11 @@ function addTab(panelId, url = '') {
   panel.activeTabId = tab.id;
   refreshPanel(panelId);
   saveState();
+  if (!url) {
+    setTimeout(() => {
+      panelsWrap.querySelector(`[data-panel-id="${panelId}"] .url-input`)?.focus();
+    }, 0);
+  }
 }
 
 // Opens a new tab without switching focus — current tab stays active.
