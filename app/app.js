@@ -129,6 +129,8 @@ const BG_COLORS = [
   '#16213e', '#0f3460', '#1a1a2e',                          // navy blues
 ];
 
+let activeBg = null;
+
 function applyBackground(bg) {
   if (!bg || bg.type === 'default') {
     document.body.style.background = '';
@@ -142,12 +144,13 @@ function applyBackground(bg) {
 }
 
 function saveBackground(bg, persist = false) {
+  activeBg = bg;
   applyBackground(bg);
   if (persist) chrome.storage.local.set({ bg });
 }
 
 function loadBackground() {
-  chrome.storage.local.get('bg', ({ bg }) => { if (bg) applyBackground(bg); });
+  chrome.storage.local.get('bg', ({ bg }) => { if (bg) { activeBg = bg; applyBackground(bg); } });
 }
 
 function openBgPicker() {
@@ -260,9 +263,9 @@ function openBgPicker() {
 
   BG_IMAGES.forEach(img => imagesEl.appendChild(makeThumb(img.src, false)));
 
-  chrome.storage.local.get(['custom_bgs', 'bg'], ({ custom_bgs, bg }) => {
+  chrome.storage.local.get('custom_bgs', ({ custom_bgs }) => {
     (custom_bgs || []).forEach(src => imagesEl.appendChild(makeThumb(src, true)));
-    if (bg) markSelected(bg.type, bg.value);
+    if (activeBg) markSelected(activeBg.type, activeBg.value);
   });
 
   const fileInput = document.getElementById('bg-file-input');
