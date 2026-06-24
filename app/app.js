@@ -263,8 +263,9 @@ function openScalingModal() {
   box.onclick = e => e.stopPropagation();
 
   const options = [
-    { value: 'fit',  label: 'Scale to fit',   desc: 'Panels shrink to fit the window. Nothing is cut off.' },
-    { value: 'real', label: '100% real size',  desc: 'Panels always show at full pixel size. Scroll horizontally if needed.' },
+    { value: 'fit',  label: 'Shrink to fit',     desc: 'Panels shrink when the window is too small, but never enlarge beyond their real size.' },
+    { value: 'fill', label: 'Always fill window', desc: 'Panels always scale to fill all available space — shrinks when too small, grows when there is room.' },
+    { value: 'real', label: '100% real size',     desc: 'Panels always show at full pixel size. Scroll horizontally if needed.' },
   ];
 
   box.innerHTML = `
@@ -426,11 +427,12 @@ function applyAutoScale() {
   const naturalH = panelsWrap.scrollHeight;
   if (naturalW <= 0 || naturalH <= 0) return;
 
-  const factor = Math.min(
-    naturalW > availW ? availW / naturalW : 1,
-    naturalH > availH ? availH / naturalH : 1,
-  );
-  if (factor >= 1) return;
+  const factorW = availW / naturalW;
+  const factorH = availH / naturalH;
+  const factor = state.scaling === 'fill'
+    ? Math.min(factorW, factorH)
+    : Math.min(1, factorW, factorH);
+  if (factor === 1) return;
 
   // Scale from top-left, then shift right to center the scaled result.
   const scaledW  = naturalW * factor;
@@ -817,7 +819,7 @@ function makeTabStrip(panel) {
   menuBtn.className = 'strip-icon-btn';
   menuBtn.title = 'Opcje panelu';
   menuBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`;
-  menuBtn.onclick = (e) => { e.stopPropagation(); openPanelMenu(panel.id, menuBtn); };
+  menuBtn.onclick = (e) => { e.stopPropagation(); if (activeDropdown && activeDropdown.dataset.panelId === panel.id) { closeAllDropdowns(); } else { openPanelMenu(panel.id, menuBtn); } };
   right.appendChild(menuBtn);
 
   strip.appendChild(right);
@@ -1652,6 +1654,7 @@ function openPanelMenu(panelId, anchor) {
   const tab = getActiveTab(panel);
   const menu = document.createElement('div');
   menu.className = 'dropdown';
+  menu.dataset.panelId = panelId;
   activeDropdown = menu;
 
   const panelItems = [
