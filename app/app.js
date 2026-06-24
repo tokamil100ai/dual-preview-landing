@@ -1282,7 +1282,10 @@ function makeIframe(panel) {
   } else {
     if (panel.type === 'mobile') sendBg({ type: 'db-clear-ua', devId: panel.devId });
     const homeBase = panel.type === 'mobile' ? NEW_TAB_HOME_MOBILE : NEW_TAB_HOME_DESKTOP;
-    sendBg({ type: 'db-clear-dpl-cookie' }).finally(() => { if (!tab.url) iframe.src = homeBase; });
+    const homeOrigin = 'https://wtyczka-ramka-aktualizacji.vercel.app';
+    chrome.cookies.remove({ url: homeOrigin, name: '__dpl' });
+    chrome.cookies.remove({ url: homeOrigin, name: '__vdpl' });
+    iframe.src = homeBase;
   }
   return iframe;
 }
