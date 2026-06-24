@@ -65,7 +65,7 @@ function openScreenSizesModal() {
 
   box.innerHTML = `
     <div class="modal-header">
-      <span class="modal-title">Screen sizes</span>
+      <span class="modal-title">Panel sizes</span>
       <button class="modal-close" id="ss-close">×</button>
     </div>
     <div class="bg-section-label">Mobile</div>
@@ -1746,7 +1746,7 @@ function openPanelMenu(panelId, anchor) {
     { icon: svgMuteIcon(),    label: 'Audio',        fn: () => openMuteModal() },
     { icon: svgBgIcon(),      label: 'Background',   fn: () => openBgPicker() },
     { icon: svgScaleIcon(),   label: 'Scaling',      fn: () => openScalingModal() },
-    { icon: svgScreenIcon(),  label: 'Screen sizes', fn: () => openScreenSizesModal() },
+    { icon: svgScreenIcon(),  label: 'Panel sizes', fn: () => openScreenSizesModal() },
   ];
 
   function addSection(label, sectionItems) {
