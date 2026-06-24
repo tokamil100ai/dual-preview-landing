@@ -636,6 +636,7 @@ html, body {
 }
 .dropdown-item:hover { background: #f1f3f4; }
 .dropdown-item.danger { color: #d93025; }
+.dropdown-item.disabled { opacity: .38; cursor: default; pointer-events: none; }
 .dropdown-item svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
 .dropdown-item.danger svg { color: #d93025; }
 .dropdown-sep { height: 1px; background: #e8eaed; margin: 4px 0; }

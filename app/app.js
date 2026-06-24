@@ -2031,7 +2031,7 @@ function openPanelMenu(panelId, anchor) {
   const panelItems = [
     state.panels.length > 1 ? { icon: svgClose(), label: 'Close', danger: true, fn: () => { closeAllDropdowns(); confirmClose(panelId, () => removePanel(panelId)); } } : null,
     { icon: svgDup(),    label: 'Duplicate',                fn: () => duplicatePanel(panelId) },
-    { icon: svgQr(),     label: 'Create QR code',           fn: () => showQR(tab?.url) },
+    { icon: svgQr(),     label: 'Create QR code',           fn: () => showQR(tab?.url), disabled: !tab?.url },
     { icon: svgSwitch(), label: panel.type === 'mobile' ? 'Switch to desktop' : 'Switch to mobile', fn: () => switchPanelType(panelId) },
     { icon: svgSpeed(),  label: 'Open in PageSpeed',        fn: () => tab?.url && window.open('https://pagespeed.web.dev/report?url=' + encodeURIComponent(tab.url), '_blank') },
   ].filter(Boolean);
@@ -2052,10 +2052,10 @@ function openPanelMenu(panelId, anchor) {
     }
     sectionItems.forEach(item => {
       const el = document.createElement('div');
-      el.className = 'dropdown-item' + (item.danger ? ' danger' : '');
+      el.className = 'dropdown-item' + (item.danger ? ' danger' : '') + (item.disabled ? ' disabled' : '');
       el.innerHTML = item.icon;
       el.appendChild(Object.assign(document.createElement('span'), { textContent: item.label }));
-      el.onclick = (e) => { closeAllDropdowns(); item.fn(e); };
+      el.onclick = (e) => { if (item.disabled) return; closeAllDropdowns(); item.fn(e); };
       menu.appendChild(el);
     });
   }
@@ -2254,6 +2254,12 @@ document.addEventListener('click', e => {
   const dd = document.getElementById('add-dropdown');
   if (!document.getElementById('add-panel-btn').contains(e.target) && !dd.contains(e.target)) dd.classList.remove('open');
   if (!e.target.closest('.vp-chip')) document.querySelectorAll('.vp-dropdown.open').forEach(d => d.classList.remove('open'));
+});
+
+window.addEventListener('blur', () => {
+  closeAllDropdowns();
+  document.getElementById('add-dropdown').classList.remove('open');
+  document.querySelectorAll('.vp-dropdown.open').forEach(d => d.classList.remove('open'));
 });
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
