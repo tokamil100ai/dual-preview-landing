@@ -363,6 +363,7 @@ const state = {
   panels: [makePanel('mobile'), makePanel('desktop')],
   sync: false,
   scaling: 'fit',
+  muted: true,
 };
 
 function getPanel(id) { return state.panels.find(p => p.id === id); }
@@ -1526,8 +1527,79 @@ function closeTab(panelId, tabId) {
   saveState();
 }
 
-// Mute the entire tab permanently so no audio ever plays from the extension page.
-chrome.runtime.sendMessage({ type: 'set-panel-mute', muted: true });
+function applyMute() {
+  chrome.runtime.sendMessage({ type: 'set-panel-mute', muted: state.muted });
+}
+
+function openMuteModal() {
+  const existing = document.getElementById('mute-modal');
+  if (existing) { existing.remove(); return; }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'mute-modal';
+  overlay.className = 'modal-overlay';
+  const originalMuted = state.muted;
+  const close = () => { document.removeEventListener('keydown', onEscMute); overlay.remove(); };
+  const onEscMute = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onEscMute);
+  overlay.onclick = e => { if (e.target === overlay) close(); };
+
+  const box = document.createElement('div');
+  box.className = 'modal-box scaling-box';
+  box.onclick = e => e.stopPropagation();
+
+  const options = [
+    { value: true,  label: 'Muted',    desc: 'All audio from panels is muted.' },
+    { value: false, label: 'Unmuted',  desc: 'Audio from panels plays normally.' },
+  ];
+
+  box.innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">Audio</span>
+      <button class="modal-close" id="mute-close">×</button>
+    </div>
+    <div class="scaling-options" id="mute-options"></div>
+    <div class="modal-footer">
+      <label class="make-default-wrap"><input type="checkbox" id="mute-default"> Make it default</label>
+      <button class="bg-save-btn" id="mute-save">Save</button>
+    </div>
+  `;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  let pendingMuted = state.muted;
+  document.getElementById('mute-close').onclick = close;
+
+  const optionsEl = document.getElementById('mute-options');
+  options.forEach(opt => {
+    const row = document.createElement('label');
+    row.className = 'scaling-row' + (state.muted === opt.value ? ' selected' : '');
+    row.innerHTML = `
+      <input type="radio" name="mute" value="${opt.value}" ${state.muted === opt.value ? 'checked' : ''}>
+      <div class="scaling-row-text">
+        <span class="scaling-row-label">${opt.label}</span>
+        <span class="scaling-row-desc">${opt.desc}</span>
+      </div>
+    `;
+    row.querySelector('input').onchange = () => {
+      pendingMuted = opt.value;
+      optionsEl.querySelectorAll('.scaling-row').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+    };
+    optionsEl.appendChild(row);
+  });
+
+  document.getElementById('mute-save').onclick = () => {
+    state.muted = pendingMuted;
+    applyMute();
+    if (document.getElementById('mute-default').checked) {
+      chrome.storage.local.set({ muted: pendingMuted });
+    }
+    close();
+  };
+}
+
+applyMute();
 
 // ── Panels ────────────────────────────────────────────────────────────────────
 
@@ -1669,6 +1741,7 @@ function openPanelMenu(panelId, anchor) {
     { icon: svgBgIcon(),      label: 'Background',   fn: () => openBgPicker() },
     { icon: svgScaleIcon(),   label: 'Scaling',      fn: () => openScalingModal() },
     { icon: svgScreenIcon(),  label: 'Screen sizes', fn: () => openScreenSizesModal() },
+    { icon: svgMuteIcon(),    label: 'Audio',        fn: () => openMuteModal() },
   ];
 
   function addSection(label, sectionItems) {
@@ -1842,15 +1915,17 @@ function svgSpeed()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="curr
 function svgBgIcon()    { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`; }
 function svgScaleIcon()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`; }
 function svgScreenIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="22" x2="16" y2="22"/><line x1="12" y1="18" x2="12" y2="22"/></svg>`; }
-function svgTrash()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>`; }
+function svgTrash()    { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>`; }
+function svgMuteIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`; }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
 // loadState(); — disabled: always start with default panels
 
 loadBackground();
-chrome.storage.local.get(['scaling', 'screen_sizes'], (res) => {
+chrome.storage.local.get(['scaling', 'screen_sizes', 'muted'], (res) => {
   if (res.scaling) { state.scaling = res.scaling; }
+  if (res.muted !== undefined) { state.muted = res.muted; applyMute(); }
   if (res.screen_sizes) {
     const s = res.screen_sizes;
     defaultSizes.mobileW = s.mobileW; defaultSizes.mobileH = s.mobileH; defaultSizes.desktopW = s.desktopW;
