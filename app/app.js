@@ -520,6 +520,7 @@ function makePanelEl(panel) {
   const win = document.createElement('div');
   win.className = 'browser-win';
   win.style.width = panel.viewport.w + 'px';
+  win.style.height = panel.viewport.h + 'px';
   win.appendChild(makeTabStrip(panel));
   win.appendChild(makeUrlbar(panel));
   win.appendChild(makeIframe(panel));
