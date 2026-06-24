@@ -32,8 +32,7 @@ html, body {
   font-size: 13px;
   background: var(--panel-bg);
   color: var(--text);
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
