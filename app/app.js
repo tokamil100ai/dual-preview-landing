@@ -1737,10 +1737,10 @@ function openPanelMenu(panelId, anchor) {
   ].filter(Boolean);
 
   const extItems = [
+    { icon: svgMuteIcon(),    label: 'Audio',        fn: () => openMuteModal() },
     { icon: svgBgIcon(),      label: 'Background',   fn: () => openBgPicker() },
     { icon: svgScaleIcon(),   label: 'Scaling',      fn: () => openScalingModal() },
     { icon: svgScreenIcon(),  label: 'Screen sizes', fn: () => openScreenSizesModal() },
-    { icon: svgMuteIcon(),    label: 'Audio',        fn: () => openMuteModal() },
   ];
 
   function addSection(label, sectionItems) {
