@@ -547,6 +547,23 @@ html, body {
 .dropdown-item svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
 .dropdown-item.danger svg { color: #d93025; }
 .dropdown-sep { height: 1px; background: #e8eaed; margin: 4px 0; }
+.close-confirm-pop {
+  position: fixed; z-index: 9999;
+  background: #fff; border: 1px solid #e0e0e0;
+  border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.14);
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: #333; white-space: nowrap;
+}
+.close-confirm-pop .cc-yes {
+  background: #e53935; color: #fff; border: none;
+  border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 13px;
+}
+.close-confirm-pop .cc-yes:hover { background: #b71c1c; }
+.close-confirm-pop .cc-no {
+  background: #f1f3f4; color: #333; border: none;
+  border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 13px;
+}
+.close-confirm-pop .cc-no:hover { background: #e0e0e0; }
 .dropdown-section-label {
   font-size: 10px; font-weight: 600; letter-spacing: .06em;
   text-transform: uppercase; color: var(--text-muted);

@@ -1565,7 +1565,7 @@ function switchTab(panelId, tabId) {
 
 function closeTab(panelId, tabId) {
   const panel = getPanel(panelId);
-  if (panel.tabs.length === 1) { if (state.panels.length > 1 && confirm('Close this panel?')) removePanel(panelId); return; }
+  if (panel.tabs.length === 1) { if (state.panels.length > 1) { const btn = panelsWrap.querySelector(`[data-panel-id="${panelId}"] .tab-close`); confirmClose(btn || document.body, () => removePanel(panelId)); } return; }
   const idx = panel.tabs.findIndex(t => t.id === tabId);
   panel.tabs.splice(idx, 1);
   if (panel.activeTabId === tabId) panel.activeTabId = panel.tabs[Math.max(0, idx - 1)].id;
@@ -1655,6 +1655,21 @@ function addPanel(type, afterPanelId) {
   if (idx >= 0) state.panels.splice(idx + 1, 0, newPanel);
   else state.panels.push(newPanel);
   render(); saveState();
+}
+
+function confirmClose(anchor, onConfirm) {
+  document.querySelector('.close-confirm-pop')?.remove();
+  const pop = document.createElement('div');
+  pop.className = 'close-confirm-pop';
+  pop.innerHTML = `<span>Close panel?</span><button class="cc-yes">Yes</button><button class="cc-no">No</button>`;
+  document.body.appendChild(pop);
+  const r = anchor.getBoundingClientRect();
+  pop.style.top = (r.bottom + 6) + 'px';
+  pop.style.left = Math.min(r.left, window.innerWidth - 220) + 'px';
+  pop.querySelector('.cc-yes').onclick = () => { pop.remove(); onConfirm(); };
+  pop.querySelector('.cc-no').onclick = () => pop.remove();
+  const onOut = e => { if (!pop.contains(e.target) && e.target !== anchor) { pop.remove(); document.removeEventListener('mousedown', onOut); } };
+  setTimeout(() => document.addEventListener('mousedown', onOut), 0);
 }
 
 function removePanel(panelId) {
@@ -1782,7 +1797,7 @@ function openPanelMenu(panelId, anchor) {
   activeDropdown = menu;
 
   const panelItems = [
-    state.panels.length > 1 ? { icon: svgClose(), label: 'Close', danger: true, fn: () => { if (confirm('Close this panel?')) removePanel(panelId); } } : null,
+    state.panels.length > 1 ? { icon: svgClose(), label: 'Close', danger: true, fn: (e) => { closeAllDropdowns(); confirmClose(e?.target?.closest('.dropdown-item') || document.body, () => removePanel(panelId)); } } : null,
     { icon: svgDup(),    label: 'Duplicate',                fn: () => duplicatePanel(panelId) },
     { icon: svgQr(),     label: 'Create QR code',           fn: () => showQR(tab?.url) },
     { icon: svgSwitch(), label: panel.type === 'mobile' ? 'Switch to desktop' : 'Switch to mobile', fn: () => switchPanelType(panelId) },
@@ -1806,7 +1821,7 @@ function openPanelMenu(panelId, anchor) {
       el.className = 'dropdown-item' + (item.danger ? ' danger' : '');
       el.innerHTML = item.icon;
       el.appendChild(Object.assign(document.createElement('span'), { textContent: item.label }));
-      el.onclick = () => { closeAllDropdowns(); item.fn(); };
+      el.onclick = (e) => { closeAllDropdowns(); item.fn(e); };
       menu.appendChild(el);
     });
   }
