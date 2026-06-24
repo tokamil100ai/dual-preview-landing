@@ -1540,6 +1540,7 @@ function makeIframe(panel) {
     chrome.cookies.remove({ url: homeOrigin, name: '__dpl' });
     chrome.cookies.remove({ url: homeOrigin, name: '__vdpl' });
     iframe.src = homeBase;
+    iframe.addEventListener('error', () => { iframe.src = 'about:blank'; }, { once: true });
   }
   return iframe;
 }
