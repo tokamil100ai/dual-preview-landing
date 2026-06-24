@@ -897,7 +897,7 @@ function makeTabStrip(panel) {
   const newBtn = document.createElement('button');
   newBtn.className = 'tab-new';
   newBtn.textContent = '+';
-  newBtn.title = 'New tab (Cmd+T)';
+  newBtn.title = 'New tab';
   newBtn.onclick = () => addTab(panel.id);
   tabsArea.appendChild(newBtn);
   strip.appendChild(tabsArea);
