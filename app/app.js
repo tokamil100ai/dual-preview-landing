@@ -121,6 +121,7 @@ const BG_IMAGES = [
   { id: 'bg2', src: '../assets/bg/2.jpg' },
   { id: 'bg3', src: '../assets/bg/3.jpg' },
   { id: 'bg4', src: '../assets/bg/4.jpg' },
+  { id: 'bg5', src: '../assets/bg/5.jpg' },
 ];
 
 const BG_COLORS = [
