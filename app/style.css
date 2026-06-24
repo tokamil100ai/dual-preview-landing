@@ -639,6 +639,14 @@ html, body {
 .scaling-row-label { font-size: 13px; font-weight: 500; color: var(--text); }
 .scaling-row-desc  { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
 
+.bg-custom-image-wrap {
+  display: flex; align-items: center; margin: 10px 18px 0;
+  cursor: pointer; gap: 8px;
+}
+.bg-custom-image-wrap span {
+  font-size: 13px; color: var(--accent); font-weight: 500;
+}
+.bg-custom-image-wrap span:hover { text-decoration: underline; }
 .bg-reset-row {
   display: block; width: calc(100% - 36px); margin: 4px 18px 0;
   background: none; border: none; text-align: left;

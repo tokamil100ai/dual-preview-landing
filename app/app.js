@@ -184,6 +184,10 @@ function openBgPicker() {
     </label>
     <div class="bg-section-label" style="margin-top:14px">Wallpaper</div>
     <div class="bg-images" id="bg-images"></div>
+    <label class="bg-custom-image-wrap" id="bg-custom-image-wrap">
+      <span>+ Custom image</span>
+      <input type="file" id="bg-file-input" accept="image/*" style="display:none">
+    </label>
     <div class="bg-section-label" style="margin-top:14px">Reset</div>
     <button class="bg-reset-row" id="bg-reset">Reset to default</button>
     <div class="modal-footer">
@@ -239,6 +243,16 @@ function openBgPicker() {
     btn.onclick = () => preview({ type: 'image', value: img.src });
     imagesEl.appendChild(btn);
   });
+
+  const fileInput = document.getElementById('bg-file-input');
+  document.getElementById('bg-custom-image-wrap').onclick = () => fileInput.click();
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => preview({ type: 'image', value: ev.target.result });
+    reader.readAsDataURL(file);
+  };
 
   document.getElementById('bg-reset').onclick = () => preview({ type: 'default' });
 
