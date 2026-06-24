@@ -639,6 +639,18 @@ html, body {
 .scaling-row-label { font-size: 13px; font-weight: 500; color: var(--text); }
 .scaling-row-desc  { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
 
+.bg-image-thumb-wrap {
+  position: relative; display: inline-block;
+}
+.bg-image-delete {
+  position: absolute; top: -6px; right: -6px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #e53935; color: #fff; border: none;
+  font-size: 13px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; z-index: 2;
+}
+.bg-image-delete:hover { background: #b71c1c; }
 .bg-custom-image-wrap {
   display: flex; align-items: center; margin: 10px 18px 0;
   cursor: pointer; gap: 8px;

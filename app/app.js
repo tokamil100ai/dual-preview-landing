@@ -234,14 +234,37 @@ function openBgPicker() {
   };
 
   const imagesEl = document.getElementById('bg-images');
-  BG_IMAGES.forEach(img => {
+
+  function makeThumb(src, removable) {
+    const wrap = document.createElement('div');
+    wrap.className = 'bg-image-thumb-wrap';
     const btn = document.createElement('button');
     btn.className = 'bg-image-thumb';
-    btn.title = img.label;
-    btn.dataset.src = img.src;
-    btn.style.backgroundImage = `url('${img.src}')`;
-    btn.onclick = () => preview({ type: 'image', value: img.src });
-    imagesEl.appendChild(btn);
+    btn.style.backgroundImage = `url('${src}')`;
+    btn.onclick = () => preview({ type: 'image', value: src });
+    wrap.appendChild(btn);
+    if (removable) {
+      const del = document.createElement('button');
+      del.className = 'bg-image-delete';
+      del.textContent = '×';
+      del.title = 'Remove';
+      del.onclick = e => {
+        e.stopPropagation();
+        chrome.storage.local.get('custom_bgs', ({ custom_bgs }) => {
+          const updated = (custom_bgs || []).filter(b => b !== src);
+          chrome.storage.local.set({ custom_bgs: updated });
+        });
+        wrap.remove();
+      };
+      wrap.appendChild(del);
+    }
+    return wrap;
+  }
+
+  BG_IMAGES.forEach(img => imagesEl.appendChild(makeThumb(img.src, false)));
+
+  chrome.storage.local.get('custom_bgs', ({ custom_bgs }) => {
+    (custom_bgs || []).forEach(src => imagesEl.appendChild(makeThumb(src, true)));
   });
 
   const fileInput = document.getElementById('bg-file-input');
@@ -250,7 +273,15 @@ function openBgPicker() {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => preview({ type: 'image', value: ev.target.result });
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      chrome.storage.local.get('custom_bgs', ({ custom_bgs }) => {
+        const updated = [...(custom_bgs || []), dataUrl];
+        chrome.storage.local.set({ custom_bgs: updated });
+        imagesEl.appendChild(makeThumb(dataUrl, true));
+      });
+      preview({ type: 'image', value: dataUrl });
+    };
     reader.readAsDataURL(file);
   };
 
