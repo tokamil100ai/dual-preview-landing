@@ -123,7 +123,6 @@ const BG_IMAGES = [
 const BG_COLORS = [
   '#ffffff', '#f5f5f5', '#e8eaed', '#2d2d2d', '#1a1a1a',  // whites → grays → dark
   '#16213e', '#0f3460', '#1a1a2e',                          // navy blues
-  '#1b4332', '#1a0533', '#3d0000',                          // deep greens / purples / reds
 ];
 
 function applyBackground(bg) {
