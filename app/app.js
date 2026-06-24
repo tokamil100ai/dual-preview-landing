@@ -1602,7 +1602,13 @@ applyMute();
 
 // ── Panels ────────────────────────────────────────────────────────────────────
 
-function addPanel(type) { state.panels.push(makePanel(type)); render(); saveState(); }
+function addPanel(type, afterPanelId) {
+  const newPanel = makePanel(type);
+  const idx = afterPanelId ? state.panels.findIndex(p => p.id === afterPanelId) : -1;
+  if (idx >= 0) state.panels.splice(idx + 1, 0, newPanel);
+  else state.panels.push(newPanel);
+  render(); saveState();
+}
 
 function removePanel(panelId) {
   if (state.panels.length <= 1) return;
@@ -1760,6 +1766,11 @@ function openPanelMenu(panelId, anchor) {
 
   addSection(`Panel (${panel.viewport.w} × ${panel.viewport.h} px)`, panelItems);
   const sep = document.createElement('div'); sep.className = 'dropdown-sep'; menu.appendChild(sep);
+  addSection('Additional panels', [
+    { icon: svgSwitch(),     label: 'Add mobile panel',  fn: () => addPanel('mobile',  panelId) },
+    { icon: svgScreenIcon(), label: 'Add desktop panel', fn: () => addPanel('desktop', panelId) },
+  ]);
+  const sep2 = document.createElement('div'); sep2.className = 'dropdown-sep'; menu.appendChild(sep2);
   addSection('General settings', extItems);
 
   document.body.appendChild(menu);
