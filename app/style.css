@@ -180,6 +180,7 @@ html, body {
   box-shadow: 0 2px 16px rgba(0,0,0,.22);
   border-radius: 8px;
   overflow: hidden;
+  background: #fff;
   /* width set inline by JS = viewport.w */
 }
 

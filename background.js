@@ -6,7 +6,7 @@ const REAL_UA         = navigator.userAgent;
 // Rule ID 1: desktop UA override. Rule ID 2: no-cache for new tab home. Both permanent.
 const DESKTOP_OVERRIDE_RULE_ID = 1;
 const NO_CACHE_RULE_ID = 2;
-const NEW_TAB_HOME_HOST = 'kamil-lukasiewicz.lovable.app';
+const NEW_TAB_HOME_HOST = 'wtyczka-ramka-aktualizacji.vercel.app';
 const devRuleId = new Map();
 let nextRuleId = 1001;
 
@@ -104,7 +104,11 @@ async function resolveMobileUrl(url) {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.type === 'db-clear-dpl-cookie') {
-    chrome.cookies.remove({ url: 'https://' + NEW_TAB_HOME_HOST, name: '__dpl' }, () => sendResponse({ ok: true }));
+    const url = 'https://' + NEW_TAB_HOME_HOST;
+    Promise.all([
+      new Promise(r => chrome.cookies.remove({ url, name: '__dpl' }, r)),
+      new Promise(r => chrome.cookies.remove({ url, name: '__vdpl' }, r)),
+    ]).then(() => sendResponse({ ok: true }));
     return true;
   }
 

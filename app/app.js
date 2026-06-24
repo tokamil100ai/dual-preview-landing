@@ -1,8 +1,8 @@
 // ── Presets ───────────────────────────────────────────────────────────────────
 
-const NEW_TAB_HOME         = 'https://kamil-lukasiewicz.lovable.app';
-const NEW_TAB_HOME_MOBILE  = 'https://kamil-lukasiewicz.lovable.app/wtyczka/mobile';
-const NEW_TAB_HOME_DESKTOP = 'https://kamil-lukasiewicz.lovable.app/wtyczka/desktop';
+const NEW_TAB_HOME         = 'https://wtyczka-ramka-aktualizacji.vercel.app';
+const NEW_TAB_HOME_MOBILE  = 'https://wtyczka-ramka-aktualizacji.vercel.app/wtyczka/mobile';
+const NEW_TAB_HOME_DESKTOP = 'https://wtyczka-ramka-aktualizacji.vercel.app/wtyczka/desktop';
 
 const MOBILE_PRESETS = [
   { label: 'iPhone X / 11 / 12 / 13', w: 375, h: 812 },
