@@ -130,6 +130,13 @@ html, body {
   cursor: ns-resize;
   z-index: 10;
 }
+.resize-handle-xy {
+  position: absolute;
+  bottom: 14px; right: 0;
+  width: 20px; height: 20px;
+  cursor: nwse-resize;
+  z-index: 11;
+}
 
 /* ─── Snap line ───────────────────────────────────────────── */
 .snap-line-x {

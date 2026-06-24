@@ -536,6 +536,11 @@ function makePanelEl(panel) {
   el.appendChild(rHandleY);
   initResizeY(panel.id, rHandleY);
 
+  const rHandleXY = document.createElement('div');
+  rHandleXY.className = 'resize-handle-xy';
+  el.appendChild(rHandleXY);
+  initResizeXY(panel.id, rHandleXY);
+
   return el;
 }
 
@@ -696,6 +701,53 @@ function initResizeY(panelId, handle) {
       hideSnapLine();
       const raw = Math.round(Math.max(400, startH + (ev.clientY - startY) / scale));
       panel.viewport.h = snapValue(raw, candidates);
+      refreshPanel(panelId);
+      applyAutoScale();
+      saveState();
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
+function initResizeXY(panelId, handle) {
+  handle.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const panel = getPanel(panelId);
+    const startX = e.clientX, startY = e.clientY;
+    const startW = panel.viewport.w, startH = panel.viewport.h;
+    const scale = getScale();
+    const candidatesX = getSnapCandidatesX(panel.type);
+    const candidatesY = getSnapCandidatesY();
+    const PAD = 12;
+    const el = panelsWrap.querySelector(`[data-panel-id="${panelId}"]`);
+    const win = el?.querySelector('.browser-win');
+    const iframe = el?.querySelector('iframe');
+    document.body.style.cursor = 'nwse-resize';
+    document.body.style.userSelect = 'none';
+    addIframeOverlay();
+
+    function onMove(ev) {
+      const w = snapValue(Math.round(Math.max(200, startW + (ev.clientX - startX) / scale)), candidatesX);
+      const h = snapValue(Math.round(Math.max(400, startH + (ev.clientY - startY) / scale)), candidatesY);
+      if (el)     el.style.flex = `0 0 ${w + PAD * 2}px`;
+      if (win)    { win.style.width = w + 'px'; win.style.height = h + 'px'; }
+      if (iframe) { iframe.style.width = w + 'px'; iframe.style.minWidth = w + 'px'; iframe.style.maxWidth = w + 'px'; iframe.style.height = h + 'px'; }
+      showResizeTooltip(ev.clientX, ev.clientY, `${w} × ${h}`);
+    }
+
+    function onUp(ev) {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      removeIframeOverlay();
+      hideResizeTooltip();
+      panel.viewport.w = snapValue(Math.round(Math.max(200, startW + (ev.clientX - startX) / scale)), candidatesX);
+      panel.viewport.h = snapValue(Math.round(Math.max(400, startH + (ev.clientY - startY) / scale)), candidatesY);
       refreshPanel(panelId);
       applyAutoScale();
       saveState();
