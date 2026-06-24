@@ -2030,10 +2030,11 @@ function openPanelMenu(panelId, anchor) {
   ].filter(Boolean);
 
   const extItems = [
-    { icon: svgMuteIcon(),    label: 'Audio',        fn: () => openMuteModal() },
-    { icon: svgBgIcon(),      label: 'Background',   fn: () => openBgPicker() },
-    { icon: svgScaleIcon(),   label: 'Scaling',      fn: () => openScalingModal() },
-    { icon: svgScreenIcon(),  label: 'Panel sizes', fn: () => openScreenSizesModal() },
+    { icon: svgMuteIcon(),    label: 'Audio',          fn: () => openMuteModal() },
+    { icon: svgBgIcon(),      label: 'Background',     fn: () => openBgPicker() },
+    { icon: svgScaleIcon(),   label: 'Scaling',        fn: () => openScalingModal() },
+    { icon: svgScreenIcon(),  label: 'Panel sizes',    fn: () => openScreenSizesModal() },
+    { icon: svgFeedback(),    label: 'Share feedback', fn: () => openFeedbackModal() },
   ];
 
   function addSection(label, sectionItems) {
@@ -2256,6 +2257,33 @@ window.addEventListener('blur', () => {
 });
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
+
+function openFeedbackModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'modal-box t-modal';
+  box.innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">Share feedback</span>
+      <button class="modal-close" id="feedback-close">×</button>
+    </div>
+    <div style="padding:20px 20px 24px; font-size:13px; line-height:1.6; color:#444">
+      <p>Found a bug or have a suggestion? I'd love to hear from you!</p>
+      <p style="margin-top:12px">Reach out at: <a href="mailto:kamil.lukasiewicz@gmail.com" style="color:var(--accent);text-decoration:none;font-weight:500">kamil.lukasiewicz@gmail.com</a></p>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.appendChild(box);
+  openModalOverlay(overlay, box);
+  const close = () => closeModalOverlay(overlay, box);
+  document.getElementById('feedback-close').onclick = close;
+  overlay.onclick = e => { if (e.target === overlay) close(); };
+  const onEsc = e => { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); } };
+  document.addEventListener('keydown', onEsc);
+}
+
+function svgFeedback() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`; }
 
 function svgClose()  { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`; }
 function svgDup()    { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`; }
