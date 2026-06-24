@@ -1,3 +1,9 @@
+// ── Analytics ─────────────────────────────────────────────────────────────────
+posthog.init('phc_nL22fVfw4eqdaNBehSsD3buww4jbviStdFqdGK7qLyMv', {
+  api_host: 'https://eu.i.posthog.com',
+  person_profiles: 'identified_only',
+});
+
 // ── Presets ───────────────────────────────────────────────────────────────────
 
 const NEW_TAB_HOME         = 'https://wtyczka-ramka-aktualizacji.vercel.app';
