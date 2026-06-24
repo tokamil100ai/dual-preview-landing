@@ -653,7 +653,6 @@ function initResizeX(panelId, handle) {
       hideSnapLine();
       const raw = Math.round(Math.max(200, startW + (ev.clientX - startX) / scale));
       panel.viewport.w = snapValue(raw, candidates);
-      refreshPanel(panelId);
       applyAutoScale();
       saveState();
     }
@@ -701,7 +700,6 @@ function initResizeY(panelId, handle) {
       hideSnapLine();
       const raw = Math.round(Math.max(400, startH + (ev.clientY - startY) / scale));
       panel.viewport.h = snapValue(raw, candidates);
-      refreshPanel(panelId);
       applyAutoScale();
       saveState();
     }
@@ -748,7 +746,6 @@ function initResizeXY(panelId, handle) {
       hideResizeTooltip();
       panel.viewport.w = snapValue(Math.round(Math.max(200, startW + (ev.clientX - startX) / scale)), candidatesX);
       panel.viewport.h = snapValue(Math.round(Math.max(400, startH + (ev.clientY - startY) / scale)), candidatesY);
-      refreshPanel(panelId);
       applyAutoScale();
       saveState();
     }
