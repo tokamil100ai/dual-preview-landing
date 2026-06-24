@@ -884,7 +884,7 @@ function makeTabStrip(panel) {
   const handle = document.createElement('div');
   handle.className = 'drag-handle';
   handle.innerHTML = '⠿';
-  handle.title = 'Przeciągnij aby zmienić kolejność';
+  handle.title = 'Drag to reorder';
   initPanelDrag(panel.id, handle);
   strip.appendChild(handle);
 
@@ -897,7 +897,7 @@ function makeTabStrip(panel) {
   const newBtn = document.createElement('button');
   newBtn.className = 'tab-new';
   newBtn.textContent = '+';
-  newBtn.title = 'Nowa zakładka (Cmd+T)';
+  newBtn.title = 'New tab (Cmd+T)';
   newBtn.onclick = () => addTab(panel.id);
   tabsArea.appendChild(newBtn);
   strip.appendChild(tabsArea);
@@ -914,7 +914,7 @@ function makeTabStrip(panel) {
   // panel menu btn
   const menuBtn = document.createElement('button');
   menuBtn.className = 'strip-icon-btn';
-  menuBtn.title = 'Opcje panelu';
+  menuBtn.title = 'Panel options';
   menuBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`;
   menuBtn.onclick = (e) => { e.stopPropagation(); if (activeDropdown && activeDropdown.dataset.panelId === panel.id) { closeAllDropdowns(); } else { openPanelMenu(panel.id, menuBtn); } };
   right.appendChild(menuBtn);
@@ -1058,15 +1058,15 @@ function makeUrlbar(panel) {
   const bar = document.createElement('div');
   bar.className = 'urlbar';
 
-  const back = navBtn(`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`, 'Wstecz');
+  const back = navBtn(`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`, 'Back');
   back.disabled = !tab || tab.histIdx <= 0;
   back.onclick = () => navBack(panel.id);
 
-  const fwd = navBtn(`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>`, 'Naprzód');
+  const fwd = navBtn(`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>`, 'Forward');
   fwd.disabled = !tab || tab.histIdx >= tab.history.length - 1;
   fwd.onclick = () => navForward(panel.id);
 
-  const reload = navBtn(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>`, 'Odśwież');
+  const reload = navBtn(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>`, 'Reload');
   reload.onclick = () => reloadPanel(panel.id);
 
   bar.appendChild(back);
@@ -1352,8 +1352,8 @@ function makeIframe(panel) {
   // emulate.js reads it to know device type + dimensions on every page in this frame.
   iframe.name = `db|${panel.type}|${panel.viewport.w}|${panel.viewport.h}|${panel.devId}`;
   iframe.title = panel.type === 'mobile'
-    ? `Podgląd mobilny (${panel.viewport.w}×${panel.viewport.h})`
-    : `Podgląd desktop (${panel.viewport.w}×${panel.viewport.h})`;
+    ? `Mobile panel (${panel.viewport.w}×${panel.viewport.h})`
+    : `Desktop panel (${panel.viewport.w}×${panel.viewport.h})`;
   iframe.setAttribute('width', panel.viewport.w);
   iframe.setAttribute('height', panel.viewport.h);
   iframe.style.width = panel.viewport.w + 'px';
