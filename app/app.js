@@ -1686,7 +1686,7 @@ function openPanelMenu(panelId, anchor) {
     });
   }
 
-  addSection('Panel', panelItems);
+  addSection(`Panel (${panel.viewport.w} × ${panel.viewport.h} px)`, panelItems);
   const sep = document.createElement('div'); sep.className = 'dropdown-sep'; menu.appendChild(sep);
   addSection('General settings', extItems);
 
