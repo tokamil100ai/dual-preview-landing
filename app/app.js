@@ -233,8 +233,7 @@ function openBgPicker() {
           <input type="text" class="cp-hex-input" id="cp-hex" value="#1a73e8" spellcheck="false">
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="ccd-cancel" id="bg-color-cancel">Cancel</button>
+      <div class="modal-footer" style="justify-content:flex-end">
         <button class="bg-save-btn" id="bg-color-apply">Apply</button>
       </div>
     </div>
@@ -371,12 +370,6 @@ function openBgPicker() {
   const showMainPage = () => { pageMain.style.display = 'block'; pageColor.style.display = 'none'; };
 
   document.getElementById('bg-custom-color-add').onclick = showColorPage;
-
-  document.getElementById('bg-color-cancel').onclick = () => {
-    showMainPage();
-    if (pendingBg) applyBackground(pendingBg);
-    else applyBackground(originalBg || { type: 'default' });
-  };
 
   document.getElementById('bg-close2').onclick = () => {
     showMainPage();
