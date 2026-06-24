@@ -1659,7 +1659,7 @@ function addPanel(type, afterPanelId) {
 
 function confirmClose(panelId, onConfirm) {
   document.querySelector('.close-confirm-overlay')?.remove();
-  const panelEl = panelsWrap.querySelector(`[data-panel-id="${panelId}"]`);
+  const panelEl = panelsWrap.querySelector(`[data-panel-id="${panelId}"] .browser-win`);
   if (!panelEl) return;
 
   const overlay = document.createElement('div');

@@ -180,6 +180,7 @@ html, body {
   box-shadow: 0 2px 16px rgba(0,0,0,.22);
   border-radius: 8px;
   overflow: hidden;
+  position: relative;
   background: #fff;
   /* width set inline by JS = viewport.w */
 }
@@ -549,10 +550,10 @@ html, body {
 .dropdown-sep { height: 1px; background: #e8eaed; margin: 4px 0; }
 .close-confirm-overlay {
   position: absolute; inset: 0; z-index: 100;
-  background: rgba(0,0,0,.35);
-  backdrop-filter: blur(2px);
+  background: rgba(0,0,0,.12);
   display: flex; align-items: center; justify-content: center;
   border-radius: inherit;
+  overflow: hidden;
 }
 .close-confirm-dialog {
   background: rgba(248,248,248,.96);
