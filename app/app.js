@@ -2259,6 +2259,7 @@ window.addEventListener('blur', () => {
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
 function openFeedbackModal() {
+  const { version } = chrome.runtime.getManifest();
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   const box = document.createElement('div');
@@ -2271,6 +2272,7 @@ function openFeedbackModal() {
     <div style="padding:20px 20px 24px; font-size:13px; line-height:1.6; color:#444">
       <p>Found a bug or have a suggestion? I'd love to hear from you!</p>
       <p style="margin-top:12px">Reach out at: <a href="mailto:kamil.lukasiewicz@gmail.com" style="color:var(--accent);text-decoration:none;font-weight:500">kamil.lukasiewicz@gmail.com</a></p>
+      <p style="margin-top:16px; font-size:11px; color:var(--text-muted)">Version ${version}</p>
     </div>
   `;
   document.body.appendChild(overlay);
