@@ -74,7 +74,7 @@ function openScreenSizesModal() {
     <div class="scaling-options" id="ss-desktop"></div>
     <div class="modal-footer">
       <label class="make-default-wrap"><input type="checkbox" id="ss-default"> Make it default</label>
-      <button class="bg-save-btn" id="ss-save">Save</button>
+      <button class="bg-save-btn" id="ss-save">Apply</button>
     </div>
   `;
   overlay.appendChild(box);
@@ -117,7 +117,10 @@ function openScreenSizesModal() {
 // ── Background ────────────────────────────────────────────────────────────────
 
 const BG_IMAGES = [
-  { id: 'mojave-night', label: 'Mojave Night', src: '../assets/bg/mojave-night.jpg' },
+  { id: 'bg1', src: '../assets/bg/1.jpg' },
+  { id: 'bg2', src: '../assets/bg/2.jpg' },
+  { id: 'bg3', src: '../assets/bg/3.jpg' },
+  { id: 'bg4', src: '../assets/bg/4.jpg' },
 ];
 
 const BG_COLORS = [
@@ -185,7 +188,7 @@ function openBgPicker() {
     <button class="bg-reset-row" id="bg-reset">Reset to default</button>
     <div class="modal-footer">
       <label class="make-default-wrap"><input type="checkbox" id="bg-default"> Make it default</label>
-      <button class="bg-save-btn" id="bg-save">Save</button>
+      <button class="bg-save-btn" id="bg-save">Apply</button>
     </div>
   `;
   overlay.appendChild(box);
@@ -234,9 +237,6 @@ function openBgPicker() {
     btn.dataset.src = img.src;
     btn.style.backgroundImage = `url('${img.src}')`;
     btn.onclick = () => preview({ type: 'image', value: img.src });
-    const lbl = document.createElement('span');
-    lbl.textContent = img.label;
-    btn.appendChild(lbl);
     imagesEl.appendChild(btn);
   });
 
@@ -275,7 +275,7 @@ function openScalingModal() {
     <div class="scaling-options" id="scaling-options"></div>
     <div class="modal-footer">
       <label class="make-default-wrap"><input type="checkbox" id="scaling-default"> Make it default</label>
-      <button class="bg-save-btn" id="scaling-save">Save</button>
+      <button class="bg-save-btn" id="scaling-save">Apply</button>
     </div>
   `;
   overlay.appendChild(box);
@@ -1560,7 +1560,7 @@ function openMuteModal() {
     <div class="scaling-options" id="mute-options"></div>
     <div class="modal-footer">
       <label class="make-default-wrap"><input type="checkbox" id="mute-default"> Make it default</label>
-      <button class="bg-save-btn" id="mute-save">Save</button>
+      <button class="bg-save-btn" id="mute-save">Apply</button>
     </div>
   `;
   overlay.appendChild(box);
