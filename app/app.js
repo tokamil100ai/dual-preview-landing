@@ -138,8 +138,12 @@ const BG_IMAGES = [
 ];
 
 const BG_COLORS = [
-  '#ffffff', '#f5f5f5', '#e8eaed', '#2d2d2d', '#1a1a1a',  // whites → grays → dark
-  '#16213e', '#0f3460', '#1a1a2e',                          // navy blues
+  '#ffffff', '#f5f5f5', '#e8eaed',  // grays
+  '#1a1a1a',                         // near black
+  '#1e3a5f',                         // navy
+  '#14532d',                         // forest green
+  '#581c87',                         // deep purple
+  '#7f1d1d',                         // burgundy
 ];
 
 let activeBg = null;
@@ -190,41 +194,62 @@ function openBgPicker() {
   overlay.onclick = e => { if (e.target === overlay) close(); };
 
   box.innerHTML = `
-    <div class="modal-header">
-      <span class="modal-title">Background</span>
-      <button class="modal-close" id="bg-close">×</button>
+    <div id="bg-page-main">
+      <div class="modal-header">
+        <span class="modal-title">Background</span>
+        <button class="modal-close" id="bg-close">×</button>
+      </div>
+      <div class="bg-section-label">Solid color</div>
+      <div class="bg-colors" id="bg-colors"></div>
+      <div class="bg-custom-image-wrap" id="bg-custom-color-add">
+        <span>+ Custom color</span>
+      </div>
+      <div class="bg-section-label" style="margin-top:14px">Wallpaper</div>
+      <div class="bg-images" id="bg-images"></div>
+      <div class="bg-custom-image-wrap" id="bg-custom-image-wrap">
+        <span>+ Custom image</span>
+        <input type="file" id="bg-file-input" accept="image/*" style="display:none">
+      </div>
+      <div class="modal-footer">
+        <label class="make-default-wrap"><input type="checkbox" id="bg-default"> Make it default</label>
+        <button class="bg-save-btn" id="bg-save">Apply</button>
+      </div>
     </div>
-    <div class="bg-section-label">Solid color</div>
-    <div class="bg-colors" id="bg-colors"></div>
-    <label class="bg-custom-color-wrap" id="bg-custom-wrap">
-      <span>Custom</span>
-      <input type="color" id="bg-color-custom" value="#e8eaed">
-    </label>
-    <div class="bg-section-label" style="margin-top:14px">Wallpaper</div>
-    <div class="bg-images" id="bg-images"></div>
-    <div class="bg-custom-image-wrap" id="bg-custom-image-wrap">
-      <span>+ Custom image</span>
-      <input type="file" id="bg-file-input" accept="image/*" style="display:none">
-    </div>
-    <div class="bg-section-label" style="margin-top:14px">Reset</div>
-    <button class="bg-reset-row" id="bg-reset">Reset to default</button>
-    <div class="modal-footer">
-      <label class="make-default-wrap"><input type="checkbox" id="bg-default"> Make it default</label>
-      <button class="bg-save-btn" id="bg-save">Apply</button>
+    <div id="bg-page-color" style="display:none">
+      <div class="modal-header">
+        <span class="modal-title">Custom color</span>
+        <button class="modal-close" id="bg-close2">×</button>
+      </div>
+      <div class="cp-wrap">
+        <div class="cp-gradient" id="cp-gradient">
+          <div class="cp-gradient-bg" id="cp-gradient-bg"></div>
+          <div class="cp-gradient-white"></div>
+          <div class="cp-gradient-black"></div>
+          <div class="cp-thumb" id="cp-thumb"></div>
+        </div>
+        <input type="range" class="cp-hue" id="cp-hue" min="0" max="360" value="220">
+        <div class="cp-hex-row">
+          <span class="cp-hex-label">HEX</span>
+          <input type="text" class="cp-hex-input" id="cp-hex" value="#1a73e8" spellcheck="false">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="ccd-cancel" id="bg-color-cancel">Cancel</button>
+        <button class="bg-save-btn" id="bg-color-apply">Apply</button>
+      </div>
     </div>
   `;
   overlay.appendChild(box);
   openModalOverlay(overlay, box);
 
   const markSelected = (type, value) => {
-    box.querySelectorAll('.bg-color-swatch').forEach(s => s.classList.toggle('selected', type === 'color' && s.dataset.color === value));
+    let hit = false;
+    box.querySelectorAll('.bg-color-swatch').forEach(s => {
+      const match = type === 'color' && s.dataset.color === value && !hit;
+      if (match) hit = true;
+      s.classList.toggle('selected', match);
+    });
     box.querySelectorAll('.bg-image-thumb').forEach(s => s.classList.toggle('selected', type === 'image' && s.dataset.src === value));
-    const isCustom = type === 'color' && !BG_COLORS.includes(value);
-    const customWrap = box.querySelector('#bg-custom-wrap');
-    if (customWrap) {
-      customWrap.classList.toggle('selected', isCustom);
-      if (isCustom) box.querySelector('#bg-color-custom').value = value;
-    }
   };
 
   const preview = (bg) => { pendingBg = bg; applyBackground(bg); markSelected(bg.type, bg.value); };
@@ -232,6 +257,33 @@ function openBgPicker() {
   document.getElementById('bg-close').onclick = close;
 
   const colorsEl = document.getElementById('bg-colors');
+
+  function makeColorSwatch(color) {
+    const wrap = document.createElement('div');
+    wrap.className = 'bg-image-thumb-wrap';
+    const sw = document.createElement('button');
+    sw.className = 'bg-color-swatch';
+    sw.dataset.color = color;
+    sw.style.background = color;
+    sw.title = color;
+    sw.onclick = () => preview({ type: 'color', value: color });
+    wrap.appendChild(sw);
+    const del = document.createElement('button');
+    del.className = 'bg-image-delete';
+    del.textContent = '×';
+    del.title = 'Remove';
+    del.onclick = e => {
+      e.stopPropagation();
+      chrome.storage.local.get('custom_colors', ({ custom_colors }) => {
+        const updated = (custom_colors || []).filter(c => c !== color);
+        chrome.storage.local.set({ custom_colors: updated });
+      });
+      wrap.remove();
+    };
+    wrap.appendChild(del);
+    return wrap;
+  }
+
   BG_COLORS.forEach(c => {
     const sw = document.createElement('button');
     sw.className = 'bg-color-swatch';
@@ -242,8 +294,107 @@ function openBgPicker() {
     colorsEl.appendChild(sw);
   });
 
-  document.getElementById('bg-color-custom').oninput = e => {
-    preview({ type: 'color', value: e.target.value });
+  const pageMain = document.getElementById('bg-page-main');
+  const pageColor = document.getElementById('bg-page-color');
+
+  // ── Custom color picker (HSV) ──────────────────────────────────────────────
+  const cp = { h: 220, s: 0.55, v: 0.72 };
+
+  function hsvToHex(h, s, v) {
+    const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+    let r, g, b;
+    if      (h < 60)  [r,g,b] = [c,x,0];
+    else if (h < 120) [r,g,b] = [x,c,0];
+    else if (h < 180) [r,g,b] = [0,c,x];
+    else if (h < 240) [r,g,b] = [0,x,c];
+    else if (h < 300) [r,g,b] = [x,0,c];
+    else              [r,g,b] = [c,0,x];
+    return '#' + [r+m, g+m, b+m].map(v => Math.round(v*255).toString(16).padStart(2,'0')).join('');
+  }
+
+  function hexToHsv(hex) {
+    const r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+    let h = 0;
+    if (d) {
+      if (max===r) h = ((g-b)/d+6)%6;
+      else if (max===g) h = (b-r)/d+2;
+      else h = (r-g)/d+4;
+      h = Math.round(h*60);
+    }
+    return { h, s: max ? d/max : 0, v: max };
+  }
+
+  function cpRender() {
+    const hex = hsvToHex(cp.h, cp.s, cp.v);
+    document.getElementById('cp-gradient-bg').style.background = `hsl(${cp.h},100%,50%)`;
+    document.getElementById('cp-thumb').style.left = (cp.s * 100) + '%';
+    document.getElementById('cp-thumb').style.top  = ((1 - cp.v) * 100) + '%';
+    document.getElementById('cp-hue').value = cp.h;
+    const hexEl = document.getElementById('cp-hex');
+    if (document.activeElement !== hexEl) hexEl.value = hex;
+    applyBackground({ type: 'color', value: hex });
+  }
+
+  function cpInitFrom(hex) {
+    if (/^#[0-9a-f]{6}$/i.test(hex)) { const hsv = hexToHsv(hex); cp.h = hsv.h; cp.s = hsv.s; cp.v = hsv.v; }
+    cpRender();
+  }
+
+  const grad = document.getElementById('cp-gradient');
+  function updateGrad(e) {
+    const r = grad.getBoundingClientRect();
+    cp.s = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    cp.v = Math.max(0, Math.min(1, 1 - (e.clientY - r.top) / r.height));
+    cpRender();
+  }
+  grad.addEventListener('pointerdown', e => { grad.setPointerCapture(e.pointerId); updateGrad(e); });
+  grad.addEventListener('pointermove', e => { if (e.buttons) updateGrad(e); });
+
+  document.getElementById('cp-hue').oninput = e => { cp.h = +e.target.value; cpRender(); };
+
+  document.getElementById('cp-hex').addEventListener('input', e => {
+    let v = e.target.value.trim().replace(/^#/, '').replace(/[^0-9a-f]/gi, '').slice(0, 6);
+    const padded = '#' + v.padEnd(6, '0');
+    if (v.length === 6) cpInitFrom(padded);
+    else applyBackground({ type: 'color', value: padded });
+  });
+
+  // ── Page navigation ────────────────────────────────────────────────────────
+  const showColorPage = () => {
+    const startHex = (pendingBg?.type === 'color' ? pendingBg.value : null) ||
+                     (activeBg?.type === 'color' ? activeBg.value : '#1a73e8');
+    cpInitFrom(startHex);
+    pageMain.style.display = 'none';
+    pageColor.style.display = 'block';
+  };
+  const showMainPage = () => { pageMain.style.display = 'block'; pageColor.style.display = 'none'; };
+
+  document.getElementById('bg-custom-color-add').onclick = showColorPage;
+
+  document.getElementById('bg-color-cancel').onclick = () => {
+    showMainPage();
+    if (pendingBg) applyBackground(pendingBg);
+    else applyBackground(originalBg || { type: 'default' });
+  };
+
+  document.getElementById('bg-close2').onclick = () => {
+    showMainPage();
+    if (pendingBg) applyBackground(pendingBg);
+    else applyBackground(originalBg || { type: 'default' });
+  };
+
+  document.getElementById('bg-color-apply').onclick = () => {
+    const color = hsvToHex(cp.h, cp.s, cp.v);
+    chrome.storage.local.get('custom_colors', ({ custom_colors }) => {
+      if (!(custom_colors || []).includes(color)) {
+        const updated = [...(custom_colors || []), color];
+        chrome.storage.local.set({ custom_colors: updated });
+        colorsEl.appendChild(makeColorSwatch(color));
+      }
+      preview({ type: 'color', value: color });
+      showMainPage();
+    });
   };
 
   const imagesEl = document.getElementById('bg-images');
@@ -277,7 +428,8 @@ function openBgPicker() {
 
   BG_IMAGES.forEach(img => imagesEl.appendChild(makeThumb(img.src, false)));
 
-  chrome.storage.local.get('custom_bgs', ({ custom_bgs }) => {
+  chrome.storage.local.get(['custom_bgs', 'custom_colors'], ({ custom_bgs, custom_colors }) => {
+    (custom_colors || []).forEach(c => colorsEl.appendChild(makeColorSwatch(c)));
     (custom_bgs || []).forEach(src => imagesEl.appendChild(makeThumb(src, true)));
     if (activeBg) markSelected(activeBg.type, activeBg.value);
   });
@@ -300,8 +452,6 @@ function openBgPicker() {
     reader.readAsDataURL(file);
     fileInput.value = '';
   };
-
-  document.getElementById('bg-reset').onclick = () => preview({ type: 'default' });
 
   document.getElementById('bg-save').onclick = () => {
     if (pendingBg) saveBackground(pendingBg, document.getElementById('bg-default').checked);
