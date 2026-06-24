@@ -46,6 +46,19 @@ function applyScreenSizes(mobileW, mobileH, desktopW) {
   requestAnimationFrame(applyAutoScale);
 }
 
+function openModalOverlay(overlay, box) {
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => { overlay.classList.add('is-open'); box.classList.add('is-open'); });
+}
+
+function closeModalOverlay(overlay, box, extra) {
+  const ms = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--modal-close-dur')) || 150;
+  overlay.classList.remove('is-open');
+  box.classList.remove('is-open');
+  box.classList.add('is-closing');
+  setTimeout(() => { if (extra) extra(); overlay.remove(); }, ms);
+}
+
 function openScreenSizesModal() {
   const existing = document.getElementById('screen-sizes-modal');
   if (existing) { existing.remove(); return; }
@@ -60,7 +73,7 @@ function openScreenSizesModal() {
   overlay.id = 'screen-sizes-modal';
   overlay.className = 'modal-overlay';
   const box = document.createElement('div');
-  box.className = 'modal-box scaling-box';
+  box.className = 'modal-box scaling-box t-modal';
   box.onclick = e => e.stopPropagation();
 
   box.innerHTML = `
@@ -78,9 +91,9 @@ function openScreenSizesModal() {
     </div>
   `;
   overlay.appendChild(box);
-  document.body.appendChild(overlay);
+  openModalOverlay(overlay, box);
 
-  const closeScreenSizes = () => { document.removeEventListener('keydown', onEscSS); overlay.remove(); };
+  const closeScreenSizes = () => closeModalOverlay(overlay, box, () => document.removeEventListener('keydown', onEscSS));
   const onEscSS = e => { if (e.key === 'Escape') closeScreenSizes(); };
   document.addEventListener('keydown', onEscSS);
   document.getElementById('ss-close').onclick = closeScreenSizes;
@@ -166,14 +179,15 @@ function openBgPicker() {
   const overlay = document.createElement('div');
   overlay.id = 'bg-modal';
   overlay.className = 'modal-overlay';
-  const close = () => { document.removeEventListener('keydown', onEscBg); applyBackground(originalBg || { type: 'default' }); overlay.remove(); };
+
+  const box = document.createElement('div');
+  box.className = 'modal-box bg-picker-box t-modal';
+  box.onclick = e => e.stopPropagation();
+
+  const close = () => closeModalOverlay(overlay, box, () => { document.removeEventListener('keydown', onEscBg); applyBackground(originalBg || { type: 'default' }); });
   const onEscBg = e => { if (e.key === 'Escape') close(); };
   document.addEventListener('keydown', onEscBg);
   overlay.onclick = e => { if (e.target === overlay) close(); };
-
-  const box = document.createElement('div');
-  box.className = 'modal-box bg-picker-box';
-  box.onclick = e => e.stopPropagation();
 
   box.innerHTML = `
     <div class="modal-header">
@@ -200,7 +214,7 @@ function openBgPicker() {
     </div>
   `;
   overlay.appendChild(box);
-  document.body.appendChild(overlay);
+  openModalOverlay(overlay, box);
 
   const markSelected = (type, value) => {
     box.querySelectorAll('.bg-color-swatch').forEach(s => s.classList.toggle('selected', type === 'color' && s.dataset.color === value));
@@ -291,7 +305,7 @@ function openBgPicker() {
 
   document.getElementById('bg-save').onclick = () => {
     if (pendingBg) saveBackground(pendingBg, document.getElementById('bg-default').checked);
-    overlay.remove();
+    closeModalOverlay(overlay, box);
   };
 }
 
@@ -302,10 +316,9 @@ function openScalingModal() {
   const overlay = document.createElement('div');
   overlay.id = 'scaling-modal';
   overlay.className = 'modal-overlay';
-  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   const box = document.createElement('div');
-  box.className = 'modal-box scaling-box';
+  box.className = 'modal-box scaling-box t-modal';
   box.onclick = e => e.stopPropagation();
 
   const options = [
@@ -326,17 +339,16 @@ function openScalingModal() {
     </div>
   `;
   overlay.appendChild(box);
-  document.body.appendChild(overlay);
+  openModalOverlay(overlay, box);
 
   const originalScaling = state.scaling;
   let pendingScaling = state.scaling;
 
-  const closeScaling = () => {
+  const closeScaling = () => closeModalOverlay(overlay, box, () => {
     document.removeEventListener('keydown', onEscScaling);
     state.scaling = originalScaling;
     applyAutoScale();
-    overlay.remove();
-  };
+  });
   const onEscScaling = e => { if (e.key === 'Escape') closeScaling(); };
   document.addEventListener('keydown', onEscScaling);
   overlay.onclick = e => { if (e.target === overlay) closeScaling(); };
@@ -369,7 +381,7 @@ function openScalingModal() {
     if (document.getElementById('scaling-default').checked) {
       chrome.storage.local.set({ scaling: pendingScaling });
     }
-    overlay.remove();
+    closeModalOverlay(overlay, box);
   };
 }
 
@@ -1635,14 +1647,15 @@ function openMuteModal() {
   overlay.id = 'mute-modal';
   overlay.className = 'modal-overlay';
   const originalMuted = state.muted;
-  const close = () => { document.removeEventListener('keydown', onEscMute); overlay.remove(); };
+
+  const box = document.createElement('div');
+  box.className = 'modal-box scaling-box t-modal';
+  box.onclick = e => e.stopPropagation();
+
+  const close = () => closeModalOverlay(overlay, box, () => document.removeEventListener('keydown', onEscMute));
   const onEscMute = e => { if (e.key === 'Escape') close(); };
   document.addEventListener('keydown', onEscMute);
   overlay.onclick = e => { if (e.target === overlay) close(); };
-
-  const box = document.createElement('div');
-  box.className = 'modal-box scaling-box';
-  box.onclick = e => e.stopPropagation();
 
   const options = [
     { value: true,  label: 'Muted',    desc: 'All audio from panels is muted.' },
@@ -1661,7 +1674,7 @@ function openMuteModal() {
     </div>
   `;
   overlay.appendChild(box);
-  document.body.appendChild(overlay);
+  openModalOverlay(overlay, box);
 
   let pendingMuted = state.muted;
   document.getElementById('mute-close').onclick = close;
@@ -1842,8 +1855,16 @@ function refreshUrlbar(panelId) {
 let activeDropdown = null;
 
 function closeAllDropdowns() {
-  if (activeDropdown) { activeDropdown.remove(); activeDropdown = null; }
-  document.getElementById('add-dropdown').style.display = 'none';
+  if (activeDropdown) {
+    const dd = activeDropdown;
+    activeDropdown = null;
+    const ms = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dropdown-close-dur')) || 150;
+    dd.classList.remove('is-open');
+    dd.classList.add('is-closing');
+    setTimeout(() => dd.remove(), ms);
+  }
+  const addDd = document.getElementById('add-dropdown');
+  addDd.classList.remove('open');
   document.querySelectorAll('.vp-dropdown.open').forEach(d => d.classList.remove('open'));
 }
 
@@ -1852,7 +1873,8 @@ function openPanelMenu(panelId, anchor) {
   const panel = getPanel(panelId);
   const tab = getActiveTab(panel);
   const menu = document.createElement('div');
-  menu.className = 'dropdown';
+  menu.className = 'dropdown t-dropdown';
+  menu.dataset.origin = 'top-right';
   menu.dataset.panelId = panelId;
   activeDropdown = menu;
 
@@ -1934,6 +1956,7 @@ function openPanelMenu(panelId, anchor) {
   menu.style.top = (r.bottom + 4) + 'px';
   menu.style.right = (window.innerWidth - r.right) + 'px';
   menu.style.left = 'auto';
+  requestAnimationFrame(() => menu.classList.add('is-open'));
 }
 
 // ── QR ────────────────────────────────────────────────────────────────────────
@@ -1942,10 +1965,23 @@ function showQR(url) {
   if (!url) { alert('Brak URL.'); return; }
   document.getElementById('qr-url').textContent = url;
   drawQR(document.getElementById('qr-canvas'), url);
-  document.getElementById('qr-modal').classList.add('open');
+  const modal = document.getElementById('qr-modal');
+  const box = document.getElementById('qr-box');
+  modal.classList.add('open');
+  box.classList.remove('is-closing');
+  requestAnimationFrame(() => box.classList.add('is-open'));
 }
-document.getElementById('qr-close').onclick = () => document.getElementById('qr-modal').classList.remove('open');
-document.getElementById('qr-modal').onclick = e => { if (e.target.id === 'qr-modal') document.getElementById('qr-modal').classList.remove('open'); };
+function closeQR() {
+  const modal = document.getElementById('qr-modal');
+  const box = document.getElementById('qr-box');
+  const ms = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--modal-close-dur')) || 150;
+  modal.classList.remove('open');
+  box.classList.remove('is-open');
+  box.classList.add('is-closing');
+  setTimeout(() => box.classList.remove('is-closing'), ms);
+}
+document.getElementById('qr-close').onclick = closeQR;
+document.getElementById('qr-modal').onclick = e => { if (e.target.id === 'qr-modal') closeQR(); };
 
 function drawQR(container, text) {
   container.innerHTML = '';
@@ -2026,7 +2062,7 @@ function updatePresetBtns() {
 document.getElementById('add-panel-btn').onclick = e => {
   e.stopPropagation();
   const dd = document.getElementById('add-dropdown');
-  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+  dd.classList.toggle('open');
 };
 document.querySelectorAll('[data-add]').forEach(el => {
   el.onclick = () => { addPanel(el.dataset.add); closeAllDropdowns(); };
@@ -2066,7 +2102,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('click', e => {
   if (activeDropdown && !activeDropdown.contains(e.target)) closeAllDropdowns();
   const dd = document.getElementById('add-dropdown');
-  if (!document.getElementById('add-panel-btn').contains(e.target) && !dd.contains(e.target)) dd.style.display = 'none';
+  if (!document.getElementById('add-panel-btn').contains(e.target) && !dd.contains(e.target)) dd.classList.remove('open');
   if (!e.target.closest('.vp-chip')) document.querySelectorAll('.vp-dropdown.open').forEach(d => d.classList.remove('open'));
 });
 
