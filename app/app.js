@@ -184,10 +184,10 @@ function openBgPicker() {
     </label>
     <div class="bg-section-label" style="margin-top:14px">Wallpaper</div>
     <div class="bg-images" id="bg-images"></div>
-    <label class="bg-custom-image-wrap" id="bg-custom-image-wrap">
+    <div class="bg-custom-image-wrap" id="bg-custom-image-wrap">
       <span>+ Custom image</span>
       <input type="file" id="bg-file-input" accept="image/*" style="display:none">
-    </label>
+    </div>
     <div class="bg-section-label" style="margin-top:14px">Reset</div>
     <button class="bg-reset-row" id="bg-reset">Reset to default</button>
     <div class="modal-footer">
