@@ -596,6 +596,19 @@ html, body {
   text-transform: uppercase; color: var(--text-muted);
   padding: 6px 10px 2px;
 }
+.dropdown-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--text-muted);
+  padding: 6px 10px 2px;
+}
+.dropdown-reset-size {
+  background: none; border: none; cursor: pointer;
+  padding: 2px; color: var(--text-muted); display: flex;
+  border-radius: 4px;
+}
+.dropdown-reset-size:hover { background: #e8eaed; color: #333; }
+.dropdown-reset-size svg { width: 13px; height: 13px; }
 
 /* ─── Background picker modal ───────────────────────────────── */
 .modal-overlay {

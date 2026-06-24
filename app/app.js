@@ -1874,10 +1874,12 @@ function openPanelMenu(panelId, anchor) {
   ];
 
   function addSection(label, sectionItems) {
-    const hdr = document.createElement('div');
-    hdr.className = 'dropdown-section-label';
-    hdr.textContent = label;
-    menu.appendChild(hdr);
+    if (label !== null) {
+      const hdr = document.createElement('div');
+      hdr.className = 'dropdown-section-label';
+      hdr.textContent = label;
+      menu.appendChild(hdr);
+    }
     sectionItems.forEach(item => {
       const el = document.createElement('div');
       el.className = 'dropdown-item' + (item.danger ? ' danger' : '');
@@ -1888,7 +1890,39 @@ function openPanelMenu(panelId, anchor) {
     });
   }
 
-  addSection(`Panel (${panel.viewport.w} × ${panel.viewport.h} px)`, panelItems);
+  const defaultW = panel.type === 'mobile' ? defaultSizes.mobileW : defaultSizes.desktopW;
+  const defaultH = defaultSizes.mobileH;
+  const isNonDefault = panel.viewport.w !== defaultW || panel.viewport.h !== defaultH;
+
+  const sectionHeader = document.createElement('div');
+  sectionHeader.className = 'dropdown-section-header';
+  const headerLabel = document.createElement('span');
+  headerLabel.textContent = `Panel (${panel.viewport.w} × ${panel.viewport.h} px)`;
+  sectionHeader.appendChild(headerLabel);
+  if (isNonDefault) {
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'dropdown-reset-size';
+    resetBtn.title = `Reset to default (${defaultW} × ${defaultH})`;
+    resetBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
+    resetBtn.onclick = (e) => {
+      e.stopPropagation();
+      closeAllDropdowns();
+      panel.viewport.w = defaultW;
+      panel.viewport.h = defaultH;
+      const PAD = 12;
+      const el = panelsWrap.querySelector(`[data-panel-id="${panelId}"]`);
+      const win = el?.querySelector('.browser-win');
+      const iframe = el?.querySelector('iframe');
+      if (el) el.style.flex = `0 0 ${defaultW + PAD * 2}px`;
+      if (win) { win.style.width = defaultW + 'px'; win.style.height = defaultH + 'px'; }
+      if (iframe) { iframe.style.width = defaultW + 'px'; iframe.style.minWidth = defaultW + 'px'; iframe.style.maxWidth = defaultW + 'px'; iframe.style.height = defaultH + 'px'; }
+      applyAutoScale();
+      saveState();
+    };
+    sectionHeader.appendChild(resetBtn);
+  }
+  menu.appendChild(sectionHeader);
+  addSection(null, panelItems);
   const sep = document.createElement('div'); sep.className = 'dropdown-sep'; menu.appendChild(sep);
   addSection('Additional panels', [
     { icon: svgSwitch(),     label: 'Add mobile panel',  fn: () => addPanel('mobile',  panelId) },
