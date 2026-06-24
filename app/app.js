@@ -283,6 +283,7 @@ function openBgPicker() {
       preview({ type: 'image', value: dataUrl });
     };
     reader.readAsDataURL(file);
+    fileInput.value = '';
   };
 
   document.getElementById('bg-reset').onclick = () => preview({ type: 'default' });
