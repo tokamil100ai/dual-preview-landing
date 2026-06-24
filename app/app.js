@@ -236,6 +236,7 @@ function openBgPicker() {
     wrap.className = 'bg-image-thumb-wrap';
     const btn = document.createElement('button');
     btn.className = 'bg-image-thumb';
+    btn.dataset.src = src;
     btn.style.backgroundImage = `url('${src}')`;
     btn.onclick = () => preview({ type: 'image', value: src });
     wrap.appendChild(btn);
