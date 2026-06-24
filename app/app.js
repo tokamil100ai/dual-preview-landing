@@ -1565,7 +1565,7 @@ function switchTab(panelId, tabId) {
 
 function closeTab(panelId, tabId) {
   const panel = getPanel(panelId);
-  if (panel.tabs.length === 1) { if (state.panels.length > 1) { const btn = panelsWrap.querySelector(`[data-panel-id="${panelId}"] .tab-close`); confirmClose(btn || document.body, () => removePanel(panelId)); } return; }
+  if (panel.tabs.length === 1) { if (state.panels.length > 1) { const btn = panelsWrap.querySelector(`[data-panel-id="${panelId}"] .tab-close`); const rect = btn?.getBoundingClientRect() || {bottom:40,left:10}; confirmClose(rect, () => removePanel(panelId)); } return; }
   const idx = panel.tabs.findIndex(t => t.id === tabId);
   panel.tabs.splice(idx, 1);
   if (panel.activeTabId === tabId) panel.activeTabId = panel.tabs[Math.max(0, idx - 1)].id;
@@ -1657,15 +1657,14 @@ function addPanel(type, afterPanelId) {
   render(); saveState();
 }
 
-function confirmClose(anchor, onConfirm) {
+function confirmClose(rect, onConfirm) {
   document.querySelector('.close-confirm-pop')?.remove();
   const pop = document.createElement('div');
   pop.className = 'close-confirm-pop';
   pop.innerHTML = `<span>Close panel?</span><button class="cc-yes">Yes</button><button class="cc-no">No</button>`;
   document.body.appendChild(pop);
-  const r = anchor.getBoundingClientRect();
-  pop.style.top = (r.bottom + 6) + 'px';
-  pop.style.left = Math.min(r.left, window.innerWidth - 220) + 'px';
+  pop.style.top = (rect.bottom + 6) + 'px';
+  pop.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
   pop.querySelector('.cc-yes').onclick = () => { pop.remove(); onConfirm(); };
   pop.querySelector('.cc-no').onclick = () => pop.remove();
   const onOut = e => { if (!pop.contains(e.target) && e.target !== anchor) { pop.remove(); document.removeEventListener('mousedown', onOut); } };
@@ -1797,7 +1796,7 @@ function openPanelMenu(panelId, anchor) {
   activeDropdown = menu;
 
   const panelItems = [
-    state.panels.length > 1 ? { icon: svgClose(), label: 'Close', danger: true, fn: (e) => { closeAllDropdowns(); confirmClose(e?.target?.closest('.dropdown-item') || document.body, () => removePanel(panelId)); } } : null,
+    state.panels.length > 1 ? { icon: svgClose(), label: 'Close', danger: true, fn: (e) => { const rect = e.target.closest('.dropdown-item')?.getBoundingClientRect() || {bottom:40,left:10}; closeAllDropdowns(); confirmClose(rect, () => removePanel(panelId)); } } : null,
     { icon: svgDup(),    label: 'Duplicate',                fn: () => duplicatePanel(panelId) },
     { icon: svgQr(),     label: 'Create QR code',           fn: () => showQR(tab?.url) },
     { icon: svgSwitch(), label: panel.type === 'mobile' ? 'Switch to desktop' : 'Switch to mobile', fn: () => switchPanelType(panelId) },
