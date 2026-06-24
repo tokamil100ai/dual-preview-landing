@@ -214,11 +214,6 @@ function openBgPicker() {
 
   document.getElementById('bg-close').onclick = close;
 
-  // Pre-mark current selection once storage resolves.
-  chrome.storage.local.get('bg', ({ bg }) => {
-    if (bg) markSelected(bg.type, bg.value);
-  });
-
   const colorsEl = document.getElementById('bg-colors');
   BG_COLORS.forEach(c => {
     const sw = document.createElement('button');
@@ -264,8 +259,9 @@ function openBgPicker() {
 
   BG_IMAGES.forEach(img => imagesEl.appendChild(makeThumb(img.src, false)));
 
-  chrome.storage.local.get('custom_bgs', ({ custom_bgs }) => {
+  chrome.storage.local.get(['custom_bgs', 'bg'], ({ custom_bgs, bg }) => {
     (custom_bgs || []).forEach(src => imagesEl.appendChild(makeThumb(src, true)));
+    if (bg) markSelected(bg.type, bg.value);
   });
 
   const fileInput = document.getElementById('bg-file-input');
