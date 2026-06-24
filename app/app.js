@@ -59,8 +59,6 @@ function openScreenSizesModal() {
   const overlay = document.createElement('div');
   overlay.id = 'screen-sizes-modal';
   overlay.className = 'modal-overlay';
-  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-
   const box = document.createElement('div');
   box.className = 'modal-box scaling-box';
   box.onclick = e => e.stopPropagation();
@@ -82,7 +80,11 @@ function openScreenSizesModal() {
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 
-  document.getElementById('ss-close').onclick = () => overlay.remove();
+  const closeScreenSizes = () => { document.removeEventListener('keydown', onEscSS); overlay.remove(); };
+  const onEscSS = e => { if (e.key === 'Escape') closeScreenSizes(); };
+  document.addEventListener('keydown', onEscSS);
+  document.getElementById('ss-close').onclick = closeScreenSizes;
+  overlay.onclick = e => { if (e.target === overlay) closeScreenSizes(); };
 
   function renderOptions(containerId, options, getVal, setVal, keyFn) {
     const el = document.getElementById(containerId);
@@ -108,7 +110,7 @@ function openScreenSizesModal() {
     if (document.getElementById('ss-default').checked) {
       chrome.storage.local.set({ screen_sizes: { mobileW: selMobile.w, mobileH: selMobile.h, desktopW: selDesktopW } });
     }
-    overlay.remove();
+    closeScreenSizes();
   };
 }
 
@@ -158,7 +160,9 @@ function openBgPicker() {
   const overlay = document.createElement('div');
   overlay.id = 'bg-modal';
   overlay.className = 'modal-overlay';
-  const close = () => { applyBackground(originalBg || { type: 'default' }); overlay.remove(); };
+  const close = () => { document.removeEventListener('keydown', onEscBg); applyBackground(originalBg || { type: 'default' }); overlay.remove(); };
+  const onEscBg = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onEscBg);
   overlay.onclick = e => { if (e.target === overlay) close(); };
 
   const box = document.createElement('div');
@@ -281,10 +285,13 @@ function openScalingModal() {
   let pendingScaling = state.scaling;
 
   const closeScaling = () => {
+    document.removeEventListener('keydown', onEscScaling);
     state.scaling = originalScaling;
     applyAutoScale();
     overlay.remove();
   };
+  const onEscScaling = e => { if (e.key === 'Escape') closeScaling(); };
+  document.addEventListener('keydown', onEscScaling);
   overlay.onclick = e => { if (e.target === overlay) closeScaling(); };
   document.getElementById('scaling-close').onclick = closeScaling;
 
