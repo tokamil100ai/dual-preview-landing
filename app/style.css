@@ -642,13 +642,13 @@ html, body {
 .dropdown-sep { height: 1px; background: #e8eaed; margin: 4px 0; }
 .close-confirm-overlay {
   position: absolute; inset: 0; z-index: 100;
-  background: rgba(0,0,0,.12);
+  background: rgba(0,0,0,.55);
   display: flex; align-items: center; justify-content: center;
   border-radius: inherit;
   overflow: hidden;
 }
 .close-confirm-dialog {
-  background: rgba(248,248,248,.96);
+  background: #f8f8f8;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,.28), 0 0 0 1px rgba(0,0,0,.08);
   padding: 20px 24px 16px;
