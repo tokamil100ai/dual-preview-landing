@@ -53,8 +53,13 @@ async function clearAllDynamicRules() {
   devRuleId.clear();
 }
 
-chrome.action.onClicked.addListener(() => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('app/index.html') });
+chrome.action.onClicked.addListener((tab) => {
+  const url = chrome.runtime.getURL('app/index.html');
+  if (tab.incognito) {
+    chrome.windows.create({ url, incognito: true });
+  } else {
+    chrome.tabs.create({ url, windowId: tab.windowId });
+  }
 });
 
 // Cache: original url → resolved mobile url (5 min TTL).

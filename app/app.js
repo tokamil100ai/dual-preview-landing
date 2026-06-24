@@ -2,6 +2,11 @@
 posthog.init('phc_nL22fVfw4eqdaNBehSsD3buww4jbviStdFqdGK7qLyMv', {
   api_host: 'https://eu.i.posthog.com',
   person_profiles: 'identified_only',
+  autocapture: false,
+  disable_session_recording: true,
+  disable_surveys: true,
+  advanced_disable_feature_flags: true,
+  advanced_disable_feature_flags_on_first_load: true,
 });
 
 // ── Presets ───────────────────────────────────────────────────────────────────

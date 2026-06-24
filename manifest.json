@@ -38,6 +38,12 @@
       "world": "MAIN"
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["app/*", "icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "declarative_net_request": {
     "rule_resources": [
       {
