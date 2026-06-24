@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dual Preview — See mobile and desktop side by side</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #000000;
+      --secondary:     #333333;
+      --tertiary:      #0669FF;
+      --neutral:       #FFFFFF;
+      --surface-alt:   #F6F6F6;
+      --surface-foot:  #FAFAFA;
+      --muted:         #666666;
+      --blue-tint:     #E2EEFF;
+      --success:       #2CCB89;
+      --border:        #E9E9E9;
+      --on-primary:    #FFFFFF;
+
+      --font: Inter, "Inter UI", "SF Pro Display", "SF UI Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+      --max-w: 1224px;
+      --pad-x: 40px;
+      --section-pad: 110px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--neutral);
+      color: var(--primary);
+      font-size: 20px;
+      line-height: 32px;
+      color: var(--secondary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 var(--pad-x);
+    }
+
+    /* ── STICKY BAR ── */
+    .sticky-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      transform: translateY(-100%);
+      transition: transform 0.25s ease;
+    }
+
+    .sticky-bar.visible {
+      transform: translateY(0);
+    }
+
+    .sticky-bar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .sticky-bar-logo {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .sticky-bar-tagline {
+      font-size: 15px;
+      color: var(--secondary);
+    }
+
+    .btn-glass {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(6, 105, 255, 0.12);
+      color: var(--tertiary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 0 20px;
+      height: 38px;
+      border-radius: 20px;
+      border: 1px solid rgba(6, 105, 255, 0.2);
+      cursor: pointer;
+      transition: background 0.15s;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+
+    .btn-glass:hover {
+      background: rgba(6, 105, 255, 0.2);
+    }
+
+    /* ── NAV ── */
+    .nav {
+      background: var(--neutral);
+      height: 87px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .nav-logo {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--secondary);
+      text-decoration: none;
+    }
+
+    .nav-links a:hover { color: var(--primary); }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--tertiary);
+      color: var(--on-primary);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 0 32px;
+      height: 52px;
+      border-radius: 26px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover { background: #0558E0; }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-alt);
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 0 32px;
+      height: 52px;
+      border-radius: 26px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-secondary:hover { background: #EBEBEB; }
+
+    .badge {
+      display: inline-block;
+      background: var(--blue-tint);
+      color: var(--tertiary);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px 5px;
+      border-radius: 20px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 80px 0 100px;
+      background: var(--neutral);
+    }
+
+    .hero .container {
+      display: grid;
+      grid-template-columns: 45fr 55fr;
+      gap: 56px;
+      align-items: start;
+    }
+
+    .hero-video-mobile { display: none; }
+
+    .hero-left {}
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-alt);
+      color: var(--secondary);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .hero h1 {
+      font-size: 52px;
+      font-weight: 700;
+      line-height: 1.08;
+      color: var(--primary);
+      letter-spacing: -1.5px;
+      margin-bottom: 28px;
+    }
+
+    .hero p {
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 28px;
+      color: var(--secondary);
+      margin-bottom: 28px;
+    }
+
+    .hero-cta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .hero-testimonial {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding-top: 28px;
+    }
+
+    .hero-testimonial-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--surface-alt);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .hero-testimonial-text {
+      font-size: 15px;
+      line-height: 24px;
+      color: var(--secondary);
+    }
+
+    .hero-testimonial-author {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 6px;
+    }
+
+    .hero-right {}
+
+    @media (max-width: 900px) {
+      .hero .container {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+      }
+      .hero-left { order: 1; }
+      .hero-video-mobile { display: block !important; }
+      .hero-right { display: none; }
+      .hero-testimonial { order: 3; }
+    }
+
+    /* ── PRODUCT WINDOW ── */
+    .product-section {
+      padding: 0 0 var(--section-pad);
+      background: var(--neutral);
+    }
+
+    .product-window {
+      max-width: 960px;
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: rgba(0, 0, 0, 0.25) 0px 24px 50px 0px;
+      border: 1px solid var(--border);
+    }
+
+    .window-bar {
+      background: #1C1C1E;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .dot-r { background: #FF5F57; }
+    .dot-y { background: #FEBC2E; }
+    .dot-g { background: #28C840; }
+
+    .window-topbar {
+      background: #242424;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid #333;
+    }
+
+    .window-logo {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .tb-space { flex: 1; }
+
+    .tb-pill {
+      background: #333;
+      color: #aaa;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .window-panels {
+      display: flex;
+      height: 360px;
+      background: #111;
+    }
+
+    .panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #222;
+    }
+    .panel:last-child { border-right: none; }
+
+    .panel-header {
+      background: #1a1a1a;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #222;
+    }
+
+    .panel-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .panel-badge.mobile { background: rgba(167,139,250,0.15); color: #a78bfa; }
+    .panel-badge.desktop { background: rgba(52,211,153,0.1); color: #34d399; }
+
+    .panel-url {
+      flex: 1;
+      background: #2a2a2a;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: #666;
+      font-family: monospace;
+    }
+
+    .panel-body {
+      flex: 1;
+      background: #0d0d0d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Phone mockup */
+    .phone {
+      width: 120px;
+      height: 240px;
+      border: 2px solid #2a2a2a;
+      border-radius: 18px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .phone-nav {
+      height: 28px;
+      background: #fff;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      gap: 4px;
+    }
+
+    .phone-dot { width: 4px; height: 4px; background: #e0e0e0; border-radius: 50%; }
+
+    .phone-content { padding: 8px; }
+
+    .phone-hero-block {
+      width: 100%;
+      height: 52px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .phone-line { height: 5px; border-radius: 3px; background: #e8e8e8; margin-bottom: 4px; }
+    .phone-line.w100 { width: 100%; }
+    .phone-line.w70 { width: 70%; }
+    .phone-line.w50 { width: 50%; }
+
+    /* Desktop mockup */
+    .desktop {
+      width: 100%;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .desktop-nav {
+      height: 26px;
+      background: #fff;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 14px;
+    }
+
+    .desktop-nav-link { height: 4px; width: 24px; background: #e0e0e0; border-radius: 2px; }
+
+    .desktop-hero {
+      height: 68px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dh-text { flex: 1; }
+    .dh-line { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.35); margin-bottom: 5px; }
+    .dh-btn { width: 44px; height: 18px; background: rgba(255,255,255,0.25); border-radius: 4px; }
+
+    .desktop-grid {
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+
+    .desktop-card { height: 44px; background: #f5f5f5; border-radius: 4px; }
+
+    .panel-divider {
+      width: 4px;
+      background: #2a2a2a;
+      flex-shrink: 0;
+      cursor: col-resize;
+    }
+
+    /* ── SECTION HEADING ── */
+    .section-heading {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 60px;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .section-subtext {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 32px;
+      color: var(--secondary);
+    }
+
+    /* ── PROBLEM ── */
+    .problem {
+      background: var(--surface-alt);
+      padding: var(--section-pad) 0;
+    }
+
+    .problem-inner {
+      max-width: 680px;
+    }
+
+    .problem .badge {
+      margin-bottom: 24px;
+    }
+
+    /* ── MOMENTS ── */
+    .moments {
+      padding: var(--section-pad) 0;
+      background: var(--neutral);
+    }
+
+    .moments .section-heading {
+      margin-bottom: 40px;
+    }
+
+    .moments-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 680px;
+    }
+
+    .moments-list li {
+      font-size: 20px;
+      line-height: 32px;
+      color: var(--secondary);
+      padding-left: 24px;
+      position: relative;
+    }
+
+    .moments-list li::before {
+      content: "—";
+      position: absolute;
+      left: 0;
+      color: var(--tertiary);
+      font-weight: 700;
+    }
+
+    /* ── FEATURES GRID ── */
+    .features {
+      padding: var(--section-pad) 0;
+      background: var(--neutral);
+    }
+
+    .features-header {
+      margin-bottom: 64px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 60px;
+    }
+
+    .feature-item {}
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 16px;
+      color: var(--tertiary);
+    }
+
+    .feature-item h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+      line-height: 28px;
+    }
+
+    .feature-item p {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 26px;
+      color: var(--secondary);
+    }
+
+    /* ── FEATURE SECTIONS (large alternating) ── */
+    .feature-section {
+      padding: var(--section-pad) 0;
+    }
+
+    .feature-section:nth-child(even) {
+      background: var(--surface-alt);
+    }
+
+    .feature-section .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .feature-section.reverse .container {
+      direction: rtl;
+    }
+
+    .feature-section.reverse .container > * {
+      direction: ltr;
+    }
+
+    .feature-text .badge {
+      margin-bottom: 20px;
+    }
+
+    .feature-text h2 {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 60px;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .feature-text p {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 32px;
+      color: var(--secondary);
+    }
+
+    .feature-visual {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: rgba(0, 0, 0, 0.25) 0px 24px 50px 0px;
+    }
+
+    /* Visual placeholders */
+    .visual-remote {
+      background: #1C1C1E;
+      height: 340px;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 12px;
+    }
+
+    .visual-remote-row {
+      display: flex;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .remote-panel {
+      flex: 1;
+      background: #2a2a2a;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .remote-panel-header {
+      height: 28px;
+      background: #1a1a1a;
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      gap: 6px;
+    }
+
+    .remote-panel-dot { width: 5px; height: 5px; background: #444; border-radius: 50%; }
+    .remote-panel-bar { flex: 1; height: 5px; background: #333; border-radius: 2px; }
+
+    .remote-panel-body { flex: 1; background: #fff; }
+
+    .remote-topbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .remote-topbar-logo { font-size: 12px; font-weight: 700; color: #fff; }
+    .remote-topbar-space { flex: 1; }
+    .remote-tb-pill { background: #333; color: #888; font-size: 10px; padding: 3px 8px; border-radius: 4px; }
+
+    .visual-aesthetic {
+      background: #f8f8f8;
+      height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+    }
+
+    .aesthetic-phone {
+      width: 90px;
+      height: 180px;
+      border: 2px solid #e0e0e0;
+      border-radius: 14px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: rgba(0,0,0,0.12) 0px 8px 24px;
+    }
+
+    .aesthetic-phone-hero { height: 50px; background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .aesthetic-phone-content { padding: 6px; }
+    .aesthetic-line { height: 4px; background: #eee; border-radius: 2px; margin-bottom: 4px; }
+    .aesthetic-line.short { width: 60%; }
+
+    .aesthetic-desktop {
+      flex: 1;
+      height: 180px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: rgba(0,0,0,0.12) 0px 8px 24px;
+    }
+
+    .aesthetic-desktop-nav { height: 22px; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+    .aesthetic-desktop-hero { height: 52px; background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .aesthetic-desktop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 8px; }
+    .aesthetic-desktop-card { height: 36px; background: #f5f5f5; border-radius: 4px; }
+
+    .screenshot-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    /* ── PERSONAS ── */
+    .personas {
+      padding: var(--section-pad) 0;
+      background: var(--surface-alt);
+    }
+
+    .personas-header {
+      margin-bottom: 56px;
+    }
+
+    .personas-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .persona-card {
+      background: var(--neutral);
+      padding: 36px;
+      border-radius: 12px;
+    }
+
+    .persona-role {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .persona-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .persona-card p {
+      font-size: 16px;
+      line-height: 26px;
+      color: var(--secondary);
+    }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials {
+      padding: 24px 0 var(--section-pad);
+      background: var(--surface-alt);
+    }
+
+    .testimonials-header {
+      text-align: left;
+      margin-bottom: 40px;
+    }
+
+    .testimonials-header .section-subtext {
+      margin-top: 12px;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .tcard {
+      background: var(--neutral);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .tcard-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .tcard-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .tcard-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .tcard-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .tcard-handle {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    .tcard-text {
+      font-size: 15px;
+      line-height: 24px;
+      color: var(--secondary);
+    }
+
+    .testimonials-more {
+      text-align: center;
+      margin-top: 40px;
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      .testimonials-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .testimonials-grid { columns: 1; }
+      .tcard-hidden { display: none; }
+      .testimonials-more { display: block; }
+    }
+
+    /* ── ABOUT ── */
+    .about {
+      padding: var(--section-pad) 0;
+      background: var(--neutral);
+    }
+
+    .about-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+      margin-bottom: 48px;
+    }
+
+    .about-photo-wrap {
+      padding-top: 72px;
+    }
+
+    .about-photo-wrap {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .about-photo {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      aspect-ratio: 4/3;
+      border-radius: 12px;
+    }
+
+    .about-text .badge { margin-bottom: 24px; }
+
+    .about-text h2 {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 60px;
+      color: var(--primary);
+      margin-bottom: 24px;
+    }
+
+    .about-text p {
+      font-size: 20px;
+      line-height: 32px;
+      color: var(--secondary);
+      margin-bottom: 20px;
+    }
+
+    .about-text p:last-of-type { margin-bottom: 32px; }
+
+    .about-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .about-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--tertiary);
+      text-decoration: none;
+    }
+
+    .about-link:hover { text-decoration: underline; }
+
+    .about-right {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .about-photo {
+      width: 100%;
+      border-radius: 12px;
+      object-fit: cover;
+      aspect-ratio: 4/3;
+      display: block;
+    }
+
+    .tools-panel {
+      background: var(--surface-alt);
+      padding: 40px;
+      border-radius: 12px;
+    }
+
+    .tools-panel h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 28px;
+    }
+
+    .tools-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+    }
+
+    .tool-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .tool-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--tertiary);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 8px;
+    }
+
+    .tool-item-text {}
+    .tool-name { font-size: 16px; font-weight: 700; color: var(--primary); }
+    .tool-desc { font-size: 14px; color: var(--muted); line-height: 22px; }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      padding: var(--section-pad) 0;
+      background: var(--tertiary);
+      text-align: center;
+    }
+
+    .final-cta h2 {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 60px;
+      color: var(--neutral);
+      margin-bottom: 16px;
+    }
+
+    .final-cta p {
+      font-size: 20px;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 40px;
+    }
+
+    .btn-primary-light {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--neutral);
+      color: var(--tertiary);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 0 32px;
+      height: 52px;
+      border-radius: 26px;
+      transition: background 0.15s;
+    }
+
+    .btn-primary-light:hover { background: #f0f0f0; }
+
+    .cta-note {
+      margin-top: 14px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--surface-foot);
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    footer .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer span {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* ── SVG ICONS ── */
+    .icon-chrome { display: inline-block; vertical-align: middle; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      :root { --section-pad: 72px; --pad-x: 24px; }
+
+      .hero h1 { font-size: 40px; }
+      .section-heading, .feature-text h2, .about-text h2, .final-cta h2 { font-size: 36px; line-height: 46px; }
+      .features-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+      .feature-section .container { grid-template-columns: 1fr; gap: 48px; }
+      .feature-section.reverse .container { direction: ltr; }
+      .about-top { grid-template-columns: 1fr; gap: 40px; }
+      .about-photo-wrap { padding-top: 0; }
+      .tools-list { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .personas-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      :root { --section-pad: 56px; --pad-x: 20px; }
+
+      .sticky-bar-tagline { display: none; }
+
+      .hero { padding: 48px 0 64px; }
+      .hero h1 { font-size: 32px; letter-spacing: -1px; }
+      .hero p { font-size: 16px; }
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .hero-cta .btn-primary, .hero-cta .btn-secondary { justify-content: center; }
+      .hero-right { padding-left: 0 !important; padding-top: 0 !important; }
+      .hero-badge { font-size: 12px; }
+
+      .features-grid { grid-template-columns: 1fr; }
+
+      .problem .section-heading { font-size: 28px; line-height: 38px; }
+      .section-subtext { font-size: 17px; line-height: 28px; }
+
+      .tools-list { grid-template-columns: 1fr; gap: 20px; }
+      .tools-panel { padding: 28px 20px; }
+
+      .about-text h2 { font-size: 30px; line-height: 40px; }
+      .about-text p { font-size: 17px; line-height: 28px; }
+
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .tcard-hidden { display: none; }
+      .testimonials-more { display: block; }
+
+      .final-cta h2 { font-size: 30px; line-height: 40px; }
+      .final-cta p { font-size: 17px; }
+      .btn-primary-light { width: 100%; justify-content: center; }
+
+      footer .container { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .hide-mobile { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- STICKY BAR -->
+<div class="sticky-bar" id="stickyBar">
+  <div class="container">
+    <div>
+      <span class="sticky-bar-logo">Dual Preview</span>
+      <span class="sticky-bar-tagline"> — See mobile and desktop at the same time. Free.</span>
+    </div>
+    <a href="#install" class="btn-primary" style="height:40px; font-size:14px; padding:0 20px; border-radius:20px;">Try it now →</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-left">
+      <img src="https://developer.chrome.com/static/docs/webstore/branding/image/YT2Grfi9vEBa2wAPzhWa.png" alt="Available in the Chrome Web Store" style="height:52px; margin-bottom:20px; display:block;">
+      <h1>Keep mobile in sight. Always.</h1>
+      <video class="hero-video-mobile" src="video-top.mp4" autoplay loop muted playsinline style="width:100%; border-radius:12px; display:none; box-shadow: rgba(0,0,0,0.2) 0px 16px 40px; margin-bottom:24px;"></video>
+      <p>80% of internet traffic is on mobile, yet websites are built on desktop. Stop guessing how your site looks on a phone — Dual Preview is a free Chrome extension that shows both views at the same time.</p>
+      <div class="hero-cta">
+        <a href="#install" class="btn-primary" id="install">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:white;border-radius:50%;flex-shrink:0;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48" width="18" height="18"><defs><linearGradient id="cg-a" x1="3.2173" y1="15" x2="44.7812" y2="15" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#d93025"/><stop offset="1" stop-color="#ea4335"/></linearGradient><linearGradient id="cg-b" x1="20.7219" y1="47.6791" x2="41.5039" y2="11.6837" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fcc934"/><stop offset="1" stop-color="#fbbc04"/></linearGradient><linearGradient id="cg-c" x1="26.5981" y1="46.5015" x2="5.8161" y2="10.506" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1e8e3e"/><stop offset="1" stop-color="#34a853"/></linearGradient></defs><circle cx="24" cy="23.9947" r="12" style="fill:#fff"/><path d="M24,12H44.7812a23.9939,23.9939,0,0,0-41.5639.0029L13.6079,30l.0093-.0024A11.9852,11.9852,0,0,1,24,12Z" style="fill:url(#cg-a)"/><circle cx="24" cy="24" r="9.5" style="fill:#1a73e8"/><path d="M34.3913,30.0029,24.0007,48A23.994,23.994,0,0,0,44.78,12.0031H23.9989l-.0025.0093A11.985,11.985,0,0,1,34.3913,30.0029Z" style="fill:url(#cg-b)"/><path d="M13.6086,30.0031,3.218,12.006A23.994,23.994,0,0,0,24.0025,48L34.3931,30.0029l-.0067-.0068a11.9852,11.9852,0,0,1-20.7778.007Z" style="fill:url(#cg-c)"/></svg></span>
+          Try it now →
+        </a>
+        <a href="#features" class="btn-secondary">See how it works</a>
+      </div>
+      <div class="hero-testimonial">
+        <div class="hero-testimonial-avatar"><img src="avatar.jpg" alt="avatar" style="width:100%;height:100%;object-fit:cover;"></div>
+        <div>
+          <div class="hero-testimonial-text">"Finally I can review mobile and desktop in the same window. This is exactly what was missing from my workflow."</div>
+          <div class="hero-testimonial-author">Anna K., Frontend Developer</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right" style="padding-left:24px; padding-top:72px;">
+      <video src="video-top.mp4" autoplay loop muted playsinline style="width:100%; border-radius:12px; display:block; box-shadow: rgba(0,0,0,0.2) 0px 24px 50px;"></video>
+    </div>
+  </div>
+</section>
+
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="container">
+    <div class="problem-inner">
+      <h2 class="section-heading" style="margin-top:0; margin-bottom:20px;">Staring at a desktop monitor hides the mobile reality.</h2>
+      <p class="section-subtext">Current mobile testing is difficult, inefficient, and lacks full control. Mistakes happen. Dual Preview fixes this. The free Chrome extension shows both screens side-by-side.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES GRID -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-header">
+      <h2 class="section-heading">Everything you need.<span class="hide-mobile"><br>Nothing you don't.</span></h2>
+    </div>
+    <div class="features-grid">
+
+      <div class="feature-item">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="8" height="18" rx="2"/>
+          <rect x="14" y="3" width="8" height="18" rx="2"/>
+        </svg>
+        <h3>Side-by-side in one click</h3>
+        <p>Paste any URL and see it on mobile and desktop simultaneously. No DevTools, no tab switching.</p>
+      </div>
+
+      <div class="feature-item">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="7" y="2" width="10" height="20" rx="2"/>
+          <path d="M10 5h4"/>
+          <circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+        <h3>Real device viewports</h3>
+        <p>iPhone SE, iPhone 14, Pixel 7, Samsung S23 — precise presets for the phones your users actually own.</p>
+      </div>
+
+      <div class="feature-item">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <path d="M8 19v2M16 19v2M5 21h14"/>
+        </svg>
+        <h3>Multiple panels</h3>
+        <p>Compare three mobile sizes at once, or run two desktop breakpoints in parallel. Add panels dynamically.</p>
+      </div>
+
+      <div class="feature-item">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <h3>Screenshot both panels</h3>
+        <p>Capture mobile and desktop in one image. Share in Slack, drop into Figma, paste into a ticket — everyone sees both.</p>
+      </div>
+
+      <div class="feature-item">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <path d="M14 14h2v2h-2zM18 14h3M14 18h2M18 18h3v3M14 21h2"/>
+        </svg>
+        <h3>QR code to real device</h3>
+        <p>Generate a QR for any panel URL and scan it with your phone. Feel the actual experience in your hand.</p>
+      </div>
+
+      <div class="feature-item">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a10 10 0 1 0 10 10"/>
+          <path d="M12 6v6l4 2"/>
+          <path d="M18 2v4M22 2l-4 4"/>
+        </svg>
+        <h3>Open in PageSpeed</h3>
+        <p>One click from any panel to PageSpeed Insights — check performance of the exact URL you're reviewing.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- PERSONAS -->
+<section class="personas" id="who">
+  <div class="container">
+    <div class="personas-header">
+      <h2 class="section-heading">Built for everyone who ships to mobile</h2>
+    </div>
+    <div class="personas-grid">
+      <div class="persona-card">
+        <div class="persona-role">Designers & UX</div>
+        <h3>Review in real viewports before handoff</h3>
+        <p>See exactly how your layouts adapt at 375px, 390px, and 430px — before the developer asks "did you check mobile?"</p>
+      </div>
+      <div class="persona-card">
+        <div class="persona-role">Frontend Developers</div>
+        <h3>Catch breakpoints without switching tools</h3>
+        <p>Verify responsive behavior while you work. No toggling DevTools. No mental model gymnastics.</p>
+      </div>
+      <div class="persona-card">
+        <div class="persona-role">Product Managers</div>
+        <h3>Show stakeholders what users actually see</h3>
+        <p>Stop presenting desktop and calling it done. Next review, open Dual Preview and show both screens at once.</p>
+      </div>
+      <div class="persona-card">
+        <div class="persona-role">Content & Marketing</div>
+        <h3>Preview before you publish</h3>
+        <p>Check how articles, landing pages, and campaign creatives look on a phone — before hitting publish.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="container">
+    <div class="testimonials-header">
+      <h2 class="section-heading">What people are saying</h2>
+      <p class="section-subtext">Teams and developers who finally see both screens at once.</p>
+    </div>
+    <div class="testimonials-grid" id="testimonialsGrid">
+
+      <div class="tcard">
+        <div class="tcard-author">
+          <div class="tcard-avatar"><img src="https://i.pravatar.cc/40?img=5" alt="Anna K."></div>
+          <div>
+            <div class="tcard-name">Anna K.</div>
+            <div class="tcard-handle">UX Designer, Shopify</div>
+          </div>
+        </div>
+        <p class="tcard-text">"Finally I can review mobile and desktop in the same window. This is exactly what was missing from my workflow."</p>
+      </div>
+
+      <div class="tcard">
+        <div class="tcard-author">
+          <div class="tcard-avatar"><img src="https://i.pravatar.cc/40?img=11" alt="Marek J."></div>
+          <div>
+            <div class="tcard-name">Marek J.</div>
+            <div class="tcard-handle">Frontend Developer, Allegro</div>
+          </div>
+        </div>
+        <p class="tcard-text">"We used to toggle DevTools back and forth during every sprint review. Dual Preview ended that. Both views, always visible."</p>
+      </div>
+
+      <div class="tcard">
+        <div class="tcard-author">
+          <div class="tcard-avatar"><img src="https://i.pravatar.cc/40?img=23" alt="Sara B."></div>
+          <div>
+            <div class="tcard-name">Sara B.</div>
+            <div class="tcard-handle">Product Designer, Notion</div>
+          </div>
+        </div>
+        <p class="tcard-text">"I showed this to my team during a Figma handoff meeting. Nobody could believe we hadn't been using it before."</p>
+      </div>
+
+      <div class="tcard">
+        <div class="tcard-author">
+          <div class="tcard-avatar"><img src="https://i.pravatar.cc/40?img=33" alt="Tom N."></div>
+          <div>
+            <div class="tcard-name">Tom N.</div>
+            <div class="tcard-handle">Frontend Engineer, Stripe</div>
+          </div>
+        </div>
+        <p class="tcard-text">"The QR code feature is underrated. I scan it on my actual phone and instantly see the real experience. Game changer."</p>
+      </div>
+
+      <div class="tcard">
+        <div class="tcard-author">
+          <div class="tcard-avatar"><img src="https://i.pravatar.cc/40?img=44" alt="Eva W."></div>
+          <div>
+            <div class="tcard-name">Eva W.</div>
+            <div class="tcard-handle">Product Manager, Linear</div>
+          </div>
+        </div>
+        <p class="tcard-text">"Our PM stopped asking 'did you check mobile?' after we started using Dual Preview in every review. It's just always there now."</p>
+      </div>
+
+      <div class="tcard tcard-hidden">
+        <div class="tcard-author">
+          <div class="tcard-avatar"><img src="https://i.pravatar.cc/40?img=52" alt="Rafał L."></div>
+          <div>
+            <div class="tcard-name">Rafał L.</div>
+            <div class="tcard-handle">Full Stack Developer, Miro</div>
+          </div>
+        </div>
+        <p class="tcard-text">"Simple, free, works on every site. I installed it and immediately caught a broken layout on mobile that we were about to ship."</p>
+      </div>
+
+      <div class="tcard tcard-hidden">
+        <div class="tcard-author">
+          <div class="tcard-avatar"><img src="https://i.pravatar.cc/40?img=47" alt="Julia M."></div>
+          <div>
+            <div class="tcard-name">Julia M.</div>
+            <div class="tcard-handle">Marketing Lead, Webflow</div>
+          </div>
+        </div>
+        <p class="tcard-text">"I use it every morning to check our landing page on multiple viewports before standup. Takes 10 seconds and saves a lot of back-and-forth."</p>
+      </div>
+
+      <div class="tcard tcard-hidden">
+        <div class="tcard-author">
+          <div class="tcard-avatar"><img src="https://i.pravatar.cc/40?img=57" alt="David K."></div>
+          <div>
+            <div class="tcard-name">David K.</div>
+            <div class="tcard-handle">Design Lead, Figma</div>
+          </div>
+        </div>
+        <p class="tcard-text">"Mobile-first finally means something when you can actually see mobile first. Dual Preview makes that real."</p>
+      </div>
+
+    </div>
+    <div class="testimonials-more" id="testimonialsMore">
+      <button class="btn-secondary" onclick="showMoreTestimonials()">See more</button>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="container">
+    <div class="about-top">
+      <div class="about-text">
+        <span class="badge">Built by one person</span>
+        <h2>Hi, I'm [Your Name].<br>I built this.</h2>
+        <p>I'm a [role — e.g. product designer / developer] who kept running into the same problem: reviews focused on desktop, mobile was an afterthought, and tools like DevTools felt like workarounds rather than real solutions.</p>
+        <p>So I built Dual Preview as a side project — a free Chrome extension that I use every day. It took [X weeks/months], a lot of iteration, and a few technologies I want to tell you about below.</p>
+        <p>If you want to continue building it together, or just say hello — reach out.</p>
+        <div class="about-links">
+          <a href="#" class="about-link">→ LinkedIn</a>
+          <a href="#" class="about-link">→ Twitter / X</a>
+          <a href="mailto:" class="about-link">→ Email me</a>
+        </div>
+      </div>
+      <div class="about-photo-wrap">
+        <img src="https://i.pravatar.cc/600?img=11" alt="Founder photo" class="about-photo">
+      </div>
+    </div>
+    <div class="tools-panel">
+      <h3>How it was built</h3>
+      <div class="tools-list">
+        <div class="tool-item">
+          <div class="tool-dot"></div>
+          <div class="tool-item-text">
+            <div class="tool-name">Chrome Extensions API</div>
+            <div class="tool-desc">Manifest V3 — handles the iframe CORS bypass that makes the whole thing work without a proxy server.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-dot"></div>
+          <div class="tool-item-text">
+            <div class="tool-name">Vanilla JS + CSS</div>
+            <div class="tool-desc">No framework. Fast, lightweight, works anywhere in the browser without overhead.</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-dot"></div>
+          <div class="tool-item-text">
+            <div class="tool-name">[Tool / Stack you used]</div>
+            <div class="tool-desc">[Short description of why / what it solved for you.]</div>
+          </div>
+        </div>
+        <div class="tool-item">
+          <div class="tool-dot"></div>
+          <div class="tool-item-text">
+            <div class="tool-name">[Tool / Stack you used]</div>
+            <div class="tool-desc">[Short description of why / what it solved for you.]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="container">
+    <h2>Start seeing mobile<br>the way users do.</h2>
+    <p>Free Chrome extension. No account. Works on any website.</p>
+    <a href="#" class="btn-primary-light">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:white;border-radius:50%;flex-shrink:0;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48" width="16" height="16"><defs><linearGradient id="cg-a2" x1="3.2173" y1="15" x2="44.7812" y2="15" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#d93025"/><stop offset="1" stop-color="#ea4335"/></linearGradient><linearGradient id="cg-b2" x1="20.7219" y1="47.6791" x2="41.5039" y2="11.6837" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fcc934"/><stop offset="1" stop-color="#fbbc04"/></linearGradient><linearGradient id="cg-c2" x1="26.5981" y1="46.5015" x2="5.8161" y2="10.506" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1e8e3e"/><stop offset="1" stop-color="#34a853"/></linearGradient></defs><circle cx="24" cy="23.9947" r="12" style="fill:#fff"/><path d="M24,12H44.7812a23.9939,23.9939,0,0,0-41.5639.0029L13.6079,30l.0093-.0024A11.9852,11.9852,0,0,1,24,12Z" style="fill:url(#cg-a2)"/><circle cx="24" cy="24" r="9.5" style="fill:#1a73e8"/><path d="M34.3913,30.0029,24.0007,48A23.994,23.994,0,0,0,44.78,12.0031H23.9989l-.0025.0093A11.985,11.985,0,0,1,34.3913,30.0029Z" style="fill:url(#cg-b2)"/><path d="M13.6086,30.0031,3.218,12.006A23.994,23.994,0,0,0,24.0025,48L34.3931,30.0029l-.0067-.0068a11.9852,11.9852,0,0,1-20.7778.007Z" style="fill:url(#cg-c2)"/></svg></span>
+      Try it now →
+    </a>
+    <p class="cta-note">Available on Chrome Web Store</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <span>Dual Preview</span>
+    <span>Built for teams who care about mobile</span>
+  </div>
+</footer>
+
+<script>
+  function showMoreTestimonials() {
+    document.querySelectorAll('.tcard-hidden').forEach(el => el.style.display = 'block');
+    document.getElementById('testimonialsMore').style.display = 'none';
+  }
+
+  const stickyBar = document.getElementById('stickyBar');
+  const hero = document.querySelector('.hero');
+  window.addEventListener('scroll', () => {
+    const heroBottom = hero.getBoundingClientRect().bottom;
+    stickyBar.classList.toggle('visible', heroBottom < 0);
+  });
+</script>
+</body>
+</html>
