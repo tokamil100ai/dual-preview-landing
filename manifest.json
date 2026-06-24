@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Dual Browser Viewer",
+  "name": "Dual Preview",
   "version": "1.0",
   "description": "Podgląd responsywności stron w wielu panelach jednocześnie.",
   "permissions": [
@@ -25,7 +25,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "Dual Browser Viewer"
+    "default_title": "Dual Preview"
   },
   "content_scripts": [
     {
