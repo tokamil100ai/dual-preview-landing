@@ -885,8 +885,8 @@
 
     .about-top {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
+      grid-template-columns: 1fr 320px;
+      gap: 64px;
       align-items: start;
       margin-bottom: 48px;
     }
@@ -966,16 +966,18 @@
     }
 
     .tools-panel h3 {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 28px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 24px;
     }
 
     .tools-list {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .tool-item {
@@ -984,18 +986,25 @@
       gap: 14px;
     }
 
-    .tool-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--tertiary);
-      border-radius: 50%;
+    .tool-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
       flex-shrink: 0;
-      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
     }
 
+    .tool-icon img, .tool-icon svg { width: 18px; height: 18px; display: block; }
+
+    .tool-dot { display: none; }
+
     .tool-item-text {}
-    .tool-name { font-size: 16px; font-weight: 700; color: var(--primary); }
-    .tool-desc { font-size: 14px; color: var(--muted); line-height: 22px; }
+    .tool-name { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 2px; }
+    .tool-desc { font-size: 13px; color: var(--muted); line-height: 20px; }
 
     /* ── FINAL CTA ── */
     .final-cta {
@@ -1395,51 +1404,70 @@
   <div class="container">
     <div class="about-top">
       <div class="about-text">
-<h2>Hi, I'm [Your Name].<br>I built this.</h2>
-        <p>I'm a [role — e.g. product designer / developer] who kept running into the same problem: reviews focused on desktop, mobile was an afterthought, and tools like DevTools felt like workarounds rather than real solutions.</p>
-        <p>So I built Dual Preview as a side project — a free Chrome extension that I use every day. It took [X weeks/months], a lot of iteration, and a few technologies I want to tell you about below.</p>
-        <p>If you want to continue building it together, or just say hello — reach out.</p>
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+          <img src="avatar.jpg" alt="avatar" style="width:56px; height:56px; border-radius:50%; object-fit:cover; flex-shrink:0;">
+          <h2 style="margin:0;">Hey, I'm Kamil.</h2>
+        </div>
+        <p>I've spent 15+ years working in product — but this is the first time I've been able to build something entirely on my own — thanks to AI. It ain't much, but it's honest work. It feels like I've been walking my whole life and someone just handed me a bike.</p>
+        <p>Dual Preview took real time and a lot of iteration. Don't let anyone tell you AI means things happen instantly — it doesn't. But it was mostly fun, and the learning was real.</p>
+        <p>If it saves you even a few minutes a week, it was worth building.</p>
         <div class="about-links">
           <a href="#" class="about-link">→ LinkedIn</a>
           <a href="#" class="about-link">→ Twitter / X</a>
           <a href="mailto:" class="about-link">→ Email me</a>
         </div>
       </div>
-      <div class="about-photo-wrap">
-        <img src="https://i.pravatar.cc/600?img=11" alt="Founder photo" class="about-photo">
-      </div>
-    </div>
-    <div class="tools-panel">
+      <div class="tools-panel">
       <h3>How it was built</h3>
       <div class="tools-list">
+
         <div class="tool-item">
-          <div class="tool-dot"></div>
+          <div class="tool-icon" style="background:#CC785C;">
+            <!-- Anthropic / Claude logomark: radiating diagonal strokes -->
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4"  y="11" width="3.2" height="7"  rx="1.6" fill="white" transform="rotate(-35 5.6 14.5)"/>
+              <rect x="8"  y="7"  width="3.2" height="11" rx="1.6" fill="white" transform="rotate(-35 9.6 12.5)"/>
+              <rect x="13" y="5"  width="3.2" height="13" rx="1.6" fill="white" transform="rotate(-35 14.6 11.5)"/>
+            </svg>
+          </div>
           <div class="tool-item-text">
-            <div class="tool-name">Chrome Extensions API</div>
-            <div class="tool-desc">Manifest V3 — handles the iframe CORS bypass that makes the whole thing work without a proxy server.</div>
+            <div class="tool-name">Claude Code</div>
+            <div class="tool-desc">Built the entire extension and landing page with Claude — from architecture to CSS.</div>
           </div>
         </div>
+
         <div class="tool-item">
-          <div class="tool-dot"></div>
+          <div class="tool-icon" style="background:#000;">
+            <!-- Vercel triangle -->
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4L22 20H2L12 4Z" fill="white"/>
+            </svg>
+          </div>
           <div class="tool-item-text">
-            <div class="tool-name">Vanilla JS + CSS</div>
-            <div class="tool-desc">No framework. Fast, lightweight, works anywhere in the browser without overhead.</div>
+            <div class="tool-name">Vercel</div>
+            <div class="tool-desc">Hosts this landing page. Push to git, live in seconds. Zero config.</div>
           </div>
         </div>
+
         <div class="tool-item">
-          <div class="tool-dot"></div>
+          <div class="tool-icon" style="background:#F54E00;">
+            <!-- PostHog logomark: simplified hedgehog silhouette -->
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="11" cy="14" rx="7" ry="5.5" fill="white"/>
+              <circle cx="8.5" cy="12.5" r="1" fill="#F54E00"/>
+              <path d="M7 9.5 Q8 7 10 8" stroke="white" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+              <path d="M10 8 Q11 5.5 13 7" stroke="white" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+              <path d="M13 7 Q14.5 5 16 7" stroke="white" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+              <circle cx="9.5" cy="11.5" r="0.6" fill="#F54E00"/>
+            </svg>
+          </div>
           <div class="tool-item-text">
-            <div class="tool-name">[Tool / Stack you used]</div>
-            <div class="tool-desc">[Short description of why / what it solved for you.]</div>
+            <div class="tool-name">PostHog</div>
+            <div class="tool-desc">Analytics — tracks installs, clicks, and what's not working.</div>
           </div>
         </div>
-        <div class="tool-item">
-          <div class="tool-dot"></div>
-          <div class="tool-item-text">
-            <div class="tool-name">[Tool / Stack you used]</div>
-            <div class="tool-desc">[Short description of why / what it solved for you.]</div>
-          </div>
-        </div>
+
+      </div>
       </div>
     </div>
   </div>
