@@ -1046,8 +1046,8 @@
 
     /* ── FOOTER ── */
     footer {
-      background: var(--surface-foot);
-      padding: 32px 0;
+      background: var(--neutral);
+      padding: 48px 0;
       border-top: 1px solid var(--border);
     }
 
@@ -1056,11 +1056,45 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 24px;
     }
 
-    footer span {
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .footer-brand-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .footer-brand-tagline {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .footer-links a {
       font-size: 14px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    .footer-copy {
+      font-size: 13px;
       color: var(--muted);
     }
 
@@ -1123,7 +1157,8 @@
       .final-cta p { font-size: 17px; }
       .btn-primary-light { width: 100%; justify-content: center; }
 
-      footer .container { flex-direction: column; align-items: flex-start; gap: 8px; }
+      footer .container { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .footer-links { flex-wrap: wrap; gap: 20px; }
       .hide-mobile { display: none; }
     }
   </style>
@@ -1438,8 +1473,17 @@
 <!-- FOOTER -->
 <footer>
   <div class="container">
-    <span>Dual Preview</span>
-    <span>Built for teams who care about mobile</span>
+    <div class="footer-brand">
+      <span class="footer-brand-name">Dual Preview</span>
+      <span class="footer-brand-tagline">See mobile and desktop side by side.</span>
+    </div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a href="https://www.linkedin.com/in/kamillukasiewicz/" target="_blank">LinkedIn</a>
+      <a href="mailto:kamil.lukasiewicz@gmail.com">Contact</a>
+    </div>
+    <span class="footer-copy">© 2026 Kamil Łukasiewicz</span>
   </div>
 </footer>
 
