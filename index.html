@@ -511,7 +511,7 @@
     }
 
     .problem-inner {
-      max-width: 680px;
+      text-align: center;
     }
 
     .problem .badge {
@@ -1045,6 +1045,16 @@
       color: rgba(255,255,255,0.5);
     }
 
+    /* ── SCREENSHOT ── */
+    .screenshot-img {
+      display: block;
+      width: 100%;
+      margin: 48px 0 0;
+      border-radius: 8px;
+      box-shadow: rgba(0,0,0,0.25) 0px 24px 50px 0px;
+    }
+
+
     /* ── FOOTER ── */
     footer {
       background: var(--neutral);
@@ -1212,8 +1222,9 @@
 <section class="problem">
   <div class="container">
     <div class="problem-inner">
-      <h2 class="section-heading" style="margin-top:0; margin-bottom:20px;">Staring at a desktop monitor hides the mobile reality.</h2>
-      <p class="section-subtext">Current mobile testing is difficult, inefficient, and lacks full control. Mistakes happen. Dual Preview fixes this. The free Chrome extension shows both screens side-by-side.</p>
+      <h2 class="section-heading" style="margin-top:0; margin-bottom:20px; max-width: 14ch; margin-left:auto; margin-right:auto;">Staring at a desktop monitor hides the mobile reality.</h2>
+      <p class="section-subtext">Current mobile testing is difficult, inefficient, and lacks full control.<br>Dual Preview fixes this. The free Chrome extension shows both screens side-by-side.</p>
+      <img src="screen.jpg" alt="Dual Preview extension in action" class="screenshot-img">
     </div>
   </div>
 </section>
