@@ -580,7 +580,7 @@
       margin-bottom: 20px;
     }
 
-    .feature-icon { display: none; }
+    .feature-icon { display: block; width: 28px; height: 28px; margin-bottom: 16px; filter: brightness(0) saturate(100%) invert(21%) sepia(100%) saturate(3000%) hue-rotate(214deg) brightness(105%) contrast(101%); }
 
     .feature-item h3 {
       font-size: 18px;
@@ -1191,65 +1191,43 @@
     <div class="features-grid">
 
       <div class="feature-item">
-        <div class="feature-dash"></div>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="8" height="18" rx="2"/>
-          <rect x="14" y="3" width="8" height="18" rx="2"/>
-        </svg>
+
+        <img class="feature-icon" src="devices.svg" alt="">
         <h3>Side-by-side in one click</h3>
         <p>Paste any URL and see it on mobile and desktop simultaneously. No DevTools, no tab switching.</p>
       </div>
 
       <div class="feature-item">
-        <div class="feature-dash"></div>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="7" y="2" width="10" height="20" rx="2"/>
-          <path d="M10 5h4"/>
-          <circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>
-        </svg>
+
+        <img class="feature-icon" src="phone.svg" alt="">
         <h3>Real device viewports</h3>
         <p>iPhone SE, iPhone 14, Pixel 7, Samsung S23 — precise presets for the phones your users actually own.</p>
       </div>
 
       <div class="feature-item">
-        <div class="feature-dash"></div>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="5" width="20" height="14" rx="2"/>
-          <path d="M8 19v2M16 19v2M5 21h14"/>
-        </svg>
+
+        <img class="feature-icon" src="panels.svg" alt="">
         <h3>Multiple panels</h3>
         <p>Compare three mobile sizes at once, or run two desktop breakpoints in parallel. Add panels dynamically.</p>
       </div>
 
       <div class="feature-item">
-        <div class="feature-dash"></div>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-          <circle cx="12" cy="13" r="4"/>
-        </svg>
+
+        <img class="feature-icon" src="photos.svg" alt="">
         <h3>Screenshot both panels</h3>
         <p>Capture mobile and desktop in one image. Share in Slack, drop into Figma, paste into a ticket — everyone sees both.</p>
       </div>
 
       <div class="feature-item">
-        <div class="feature-dash"></div>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <path d="M14 14h2v2h-2zM18 14h3M14 18h2M18 18h3v3M14 21h2"/>
-        </svg>
+
+        <img class="feature-icon" src="qr.svg" alt="">
         <h3>QR code to real device</h3>
         <p>Generate a QR for any panel URL and scan it with your phone. Feel the actual experience in your hand.</p>
       </div>
 
       <div class="feature-item">
-        <div class="feature-dash"></div>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2a10 10 0 1 0 10 10"/>
-          <path d="M12 6v6l4 2"/>
-          <path d="M18 2v4M22 2l-4 4"/>
-        </svg>
+
+        <img class="feature-icon" src="speed.svg" alt="">
         <h3>Open in PageSpeed</h3>
         <p>One click from any panel to PageSpeed Insights — check performance of the exact URL you're reviewing.</p>
       </div>
