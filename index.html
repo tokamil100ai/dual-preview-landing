@@ -1046,8 +1046,8 @@
 
     /* ── FOOTER ── */
     footer {
-      background: var(--surface-foot);
-      padding: 32px 0;
+      background: var(--neutral);
+      padding: 48px 0;
       border-top: 1px solid var(--border);
     }
 
@@ -1056,11 +1056,45 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 24px;
     }
 
-    footer span {
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .footer-brand-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .footer-brand-tagline {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .footer-links a {
       font-size: 14px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    .footer-copy {
+      font-size: 13px;
       color: var(--muted);
     }
 
@@ -1123,7 +1157,8 @@
       .final-cta p { font-size: 17px; }
       .btn-primary-light { width: 100%; justify-content: center; }
 
-      footer .container { flex-direction: column; align-items: flex-start; gap: 8px; }
+      footer .container { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .footer-links { flex-wrap: wrap; gap: 20px; }
       .hide-mobile { display: none; }
     }
   </style>
@@ -1281,41 +1316,41 @@
         <div class="tcard-author">
           <div class="tcard-avatar"><img src="ojdowski.jpeg" alt="Mateusz"></div>
           <div>
-            <div class="tcard-name">Mateusz</div>
-            <div class="tcard-handle">Frontend Developer, Allegro</div>
+            <div class="tcard-name">Mateusz Ojdowski</div>
+            <div class="tcard-handle">Head of Product</div>
           </div>
         </div>
-        <p class="tcard-text">Finally I can review mobile and desktop in the same window. This is exactly what was missing from my workflow.</p>
+        <p class="tcard-text">It sounds small until you realize how often you were shipping broken mobile without knowing it.</p>
       </div>
 
       <div class="tcard">
         <div class="tcard-author">
           <div class="tcard-avatar"><img src="abi.jpeg" alt="Abinaya"></div>
           <div>
-            <div class="tcard-name">Abinaya</div>
-            <div class="tcard-handle">Product Designer, Notion</div>
-          </div>
-        </div>
-        <p class="tcard-text">We used to toggle DevTools back and forth during every sprint review. Dual Preview ended that. Both views, always visible.</p>
-      </div>
-
-      <div class="tcard">
-        <div class="tcard-author">
-          <div class="tcard-avatar"><img src="michal.jpeg" alt="Michał"></div>
-          <div>
-            <div class="tcard-name">Michał</div>
-            <div class="tcard-handle">Frontend Engineer, Stripe</div>
+            <div class="tcard-name">Abinaya Nadarajan</div>
+            <div class="tcard-handle">Product Designer</div>
           </div>
         </div>
         <p class="tcard-text">I showed this to my team during a Figma handoff meeting. Nobody could believe we hadn't been using it before.</p>
       </div>
 
+      <div class="tcard">
+        <div class="tcard-author">
+          <div class="tcard-avatar"><img src="tomaszewski.jpeg" alt="Mateusz Tomaszewski"></div>
+          <div>
+            <div class="tcard-name">Mateusz Tomaszewski</div>
+            <div class="tcard-handle">Mobile Developer</div>
+          </div>
+        </div>
+        <p class="tcard-text">We used to toggle DevTools back and forth during every sprint review. Dual Preview ended that. Both views, always visible.</p>
+      </div>
+
       <div class="tcard tcard-hidden">
         <div class="tcard-author">
-          <div class="tcard-avatar"><img src="tomaszewski.jpeg" alt="Mateusz"></div>
+          <div class="tcard-avatar"><img src="maciej.jpeg" alt="Maciej Ogonowski"></div>
           <div>
-            <div class="tcard-name">Mateusz</div>
-            <div class="tcard-handle">Product Manager, Linear</div>
+            <div class="tcard-name">Maciej Ogonowski</div>
+            <div class="tcard-handle">Product Designer</div>
           </div>
         </div>
         <p class="tcard-text">The QR code feature is underrated. I scan it on my actual phone and instantly see the real experience. Game changer.</p>
@@ -1323,21 +1358,10 @@
 
       <div class="tcard tcard-hidden">
         <div class="tcard-author">
-          <div class="tcard-avatar"><img src="maciej.jpeg" alt="Maciej"></div>
+          <div class="tcard-avatar"><img src="iza.jpeg" alt="Iza Łukasiewicz"></div>
           <div>
-            <div class="tcard-name">Maciej</div>
-            <div class="tcard-handle">Full Stack Developer, Miro</div>
-          </div>
-        </div>
-        <p class="tcard-text">Our PM stopped asking 'did you check mobile?' after we started using Dual Preview in every review. It's just always there now.</p>
-      </div>
-
-      <div class="tcard tcard-hidden">
-        <div class="tcard-author">
-          <div class="tcard-avatar"><img src="iza.jpeg" alt="Iza"></div>
-          <div>
-            <div class="tcard-name">Iza</div>
-            <div class="tcard-handle">Marketing Lead, Webflow</div>
+            <div class="tcard-name">Iza Łukasiewicz</div>
+            <div class="tcard-handle">Product Owner</div>
           </div>
         </div>
         <p class="tcard-text">Simple, free, works on every site. I installed it and immediately caught a broken layout on mobile that we were about to ship.</p>
@@ -1345,25 +1369,26 @@
 
       <div class="tcard tcard-hidden">
         <div class="tcard-author">
+          <div class="tcard-avatar"><img src="zieman.jpeg" alt="Bartek Zieman"></div>
+          <div>
+            <div class="tcard-name">Bartek Zieman</div>
+            <div class="tcard-handle">Product Designer</div>
+          </div>
+        </div>
+        <p class="tcard-text">Our PM stopped asking 'did you check mobile?' after we started using Dual Preview in every review. It's just always there now.</p>
+      </div>
+
+      <div class="tcard tcard-hidden">
+        <div class="tcard-author">
           <div class="tcard-avatar"><img src="michalski.jpeg" alt="Adam"></div>
           <div>
-            <div class="tcard-name">Adam</div>
-            <div class="tcard-handle">Marketing Lead, Webflow</div>
+            <div class="tcard-name">Adam Michalski</div>
+            <div class="tcard-handle">Product Builder</div>
           </div>
         </div>
         <p class="tcard-text">I use it every morning to check our landing page on multiple viewports before standup. Takes 10 seconds and saves a lot of back-and-forth.</p>
       </div>
 
-      <div class="tcard tcard-hidden">
-        <div class="tcard-author">
-          <div class="tcard-avatar"><img src="zieman.jpeg" alt="Bartek"></div>
-          <div>
-            <div class="tcard-name">Bartek</div>
-            <div class="tcard-handle">Design Lead, Figma</div>
-          </div>
-        </div>
-        <p class="tcard-text">Mobile-first finally means something when you can actually see mobile first. Dual Preview makes that real.</p>
-      </div>
 
     </div>
     <div class="testimonials-more" id="testimonialsMore">
@@ -1383,8 +1408,9 @@
             <h2 style="margin:0;">Hey, I'm Kamil.</h2>
           </div>
         </div>
-        <p>I just really wanted to get my hands dirty and use AI to solve a real problem, rather than just showing off what the technology can do. I wanted to do everything on my own — from idea to shipping and marketing. And this is it. Sure, what I did here ain't much, but it's honest work.</p>
-        <p>I've spent 15+ years working in product, but this brought a completely new quality and freedom to how I work. Working on Dual Preview took me real time and a lot of iteration — don't let anyone tell you AI means things happen instantly. But the process was mostly fun, and the learning was real. It feels like I've been walking my whole life and someone just handed me a bike.</p>
+        <p>Why did I build this? As a UX designer, I really wanted to get my hands dirty with AI and build something that solves a real problem. That meant going all the way — from idea to shipping, marketing, maintaining, and growing it. So this is it. Sure, it ain't much, but it's honest work.</p>
+        <p>I've spent 15+ years working in product. But this project gave me a whole new kind of freedom. Building Dual Preview took real time and a lot of iteration. Don't let anyone tell you AI makes things happen instantly.</p>
+        <p>But the process was mostly fun, and the learning was real. It feels like I've been walking my whole life and someone just handed me a bike.</p>
         <p>If it saves you even a few minutes a week, it was worth building.</p>
         <div class="about-links">
           <a href="https://www.linkedin.com/in/kamillukasiewicz/" class="about-link" target="_blank">→ LinkedIn</a>
@@ -1447,8 +1473,17 @@
 <!-- FOOTER -->
 <footer>
   <div class="container">
-    <span>Dual Preview</span>
-    <span>Built for teams who care about mobile</span>
+    <div class="footer-brand">
+      <span class="footer-brand-name">Dual Preview</span>
+      <span class="footer-brand-tagline">See mobile and desktop side by side.</span>
+    </div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a href="https://www.linkedin.com/in/kamillukasiewicz/" target="_blank">LinkedIn</a>
+      <a href="mailto:kamil.lukasiewicz@gmail.com">Contact</a>
+    </div>
+    <span class="footer-copy">© 2026 Kamil Łukasiewicz</span>
   </div>
 </footer>
 
