@@ -572,27 +572,33 @@
       gap: 60px;
     }
 
-    .feature-item {}
-
-    .feature-icon {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 16px;
-      color: var(--tertiary);
+    .feature-item {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 28px;
     }
 
+    .feature-dash {
+      width: 24px;
+      height: 3px;
+      background: var(--tertiary);
+      border-radius: 2px;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon { display: none; }
+
     .feature-item h3 {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--primary);
-      margin-bottom: 8px;
-      line-height: 28px;
+      margin-bottom: 10px;
+      line-height: 26px;
     }
 
     .feature-item p {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 400;
-      line-height: 26px;
+      line-height: 25px;
       color: var(--secondary);
     }
 
@@ -1086,7 +1092,16 @@
       .hero-right { padding-left: 0 !important; padding-top: 0 !important; }
       .hero-badge { font-size: 12px; }
 
-      .features-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr 1fr; gap: 0; }
+      .features .features-header { margin-bottom: 32px; }
+      .features .section-heading { font-size: 26px; line-height: 34px; }
+      .features { padding: 48px 0; }
+      .feature-item { padding-top: 20px; margin-bottom: 4px; }
+      .feature-item h3 { font-size: 15px; line-height: 22px; margin-bottom: 6px; }
+      .feature-item p { font-size: 13px; line-height: 20px; }
+      .feature-dash { margin-bottom: 14px; }
+      .features-grid .feature-item:nth-child(odd) { padding-right: 16px; }
+      .features-grid .feature-item:nth-child(even) { padding-left: 16px; }
 
       .problem .section-heading { font-size: 28px; line-height: 38px; }
       .section-subtext { font-size: 17px; line-height: 28px; }
@@ -1128,7 +1143,7 @@
   <div class="container">
     <div class="hero-left">
       <img src="https://developer.chrome.com/static/docs/webstore/branding/image/YT2Grfi9vEBa2wAPzhWa.png" alt="Available in the Chrome Web Store" style="height:52px; margin-bottom:20px; display:block;">
-      <h1>Keep mobile in sight. Always.</h1>
+      <h1>Desktop Workflow, Mobile Reality</h1>
       <video class="hero-video-mobile" src="video-top.mp4" autoplay loop muted playsinline style="width:100%; border-radius:12px; display:none; box-shadow: rgba(0,0,0,0.2) 0px 16px 40px; margin-bottom:24px;"></video>
       <p>80% of internet traffic is on mobile, yet websites are built on desktop. Stop guessing how your site looks on a phone — Dual Preview is a free Chrome extension that shows both views at the same time.</p>
       <div class="hero-cta">
@@ -1172,6 +1187,7 @@
     <div class="features-grid">
 
       <div class="feature-item">
+        <div class="feature-dash"></div>
         <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="3" width="8" height="18" rx="2"/>
           <rect x="14" y="3" width="8" height="18" rx="2"/>
@@ -1181,6 +1197,7 @@
       </div>
 
       <div class="feature-item">
+        <div class="feature-dash"></div>
         <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="7" y="2" width="10" height="20" rx="2"/>
           <path d="M10 5h4"/>
@@ -1191,6 +1208,7 @@
       </div>
 
       <div class="feature-item">
+        <div class="feature-dash"></div>
         <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="5" width="20" height="14" rx="2"/>
           <path d="M8 19v2M16 19v2M5 21h14"/>
@@ -1200,6 +1218,7 @@
       </div>
 
       <div class="feature-item">
+        <div class="feature-dash"></div>
         <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
           <circle cx="12" cy="13" r="4"/>
@@ -1209,6 +1228,7 @@
       </div>
 
       <div class="feature-item">
+        <div class="feature-dash"></div>
         <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7" rx="1"/>
           <rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -1220,6 +1240,7 @@
       </div>
 
       <div class="feature-item">
+        <div class="feature-dash"></div>
         <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2a10 10 0 1 0 10 10"/>
           <path d="M12 6v6l4 2"/>
@@ -1374,8 +1395,7 @@
   <div class="container">
     <div class="about-top">
       <div class="about-text">
-        <span class="badge">Built by one person</span>
-        <h2>Hi, I'm [Your Name].<br>I built this.</h2>
+<h2>Hi, I'm [Your Name].<br>I built this.</h2>
         <p>I'm a [role — e.g. product designer / developer] who kept running into the same problem: reviews focused on desktop, mobile was an afterthought, and tools like DevTools felt like workarounds rather than real solutions.</p>
         <p>So I built Dual Preview as a side project — a free Chrome extension that I use every day. It took [X weeks/months], a lot of iteration, and a few technologies I want to tell you about below.</p>
         <p>If you want to continue building it together, or just say hello — reach out.</p>
