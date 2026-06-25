@@ -218,17 +218,12 @@
     .hero-left {}
 
     .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface-alt);
-      color: var(--secondary);
-      font-size: 13px;
-      font-weight: 500;
-      padding: 5px 14px;
-      border-radius: 20px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border);
+      display: inline-block;
+      color: var(--tertiary);
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      letter-spacing: 0.01em;
     }
 
     .hero h1 {
@@ -1151,7 +1146,8 @@
 <section class="hero">
   <div class="container">
     <div class="hero-left">
-      <img src="https://developer.chrome.com/static/docs/webstore/branding/image/YT2Grfi9vEBa2wAPzhWa.png" alt="Available in the Chrome Web Store" style="height:52px; margin-bottom:20px; display:block;">
+      <img src="https://developer.chrome.com/static/docs/webstore/branding/image/YT2Grfi9vEBa2wAPzhWa.png" alt="Available in the Chrome Web Store" style="height:52px; margin-bottom:16px; display:block;">
+      <div class="hero-badge">Dual Preview — Chrome Extension</div>
       <h1>Desktop Workflow, Mobile Reality</h1>
       <video class="hero-video-mobile" src="video-top.mp4" autoplay loop muted playsinline style="width:100%; border-radius:12px; display:none; box-shadow: rgba(0,0,0,0.2) 0px 16px 40px; margin-bottom:24px;"></video>
       <p>80% of internet traffic is on mobile, yet websites are built on desktop. Stop guessing how your site looks on a phone — Dual Preview is a free Chrome extension that shows both views at the same time.</p>
