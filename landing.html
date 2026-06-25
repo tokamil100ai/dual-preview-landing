@@ -1003,46 +1003,70 @@
 
     /* ── FINAL CTA ── */
     .final-cta {
-      padding: var(--section-pad) 0;
-      background: var(--tertiary);
+      padding: 120px 0 100px;
+      background: #0A0A0A;
       text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-cta::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(ellipse at center, rgba(6,105,255,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .final-cta .container {
+      position: relative;
+      z-index: 1;
     }
 
     .final-cta h2 {
-      font-size: 48px;
+      font-size: 56px;
       font-weight: 700;
-      line-height: 60px;
-      color: var(--neutral);
-      margin-bottom: 16px;
+      line-height: 1.1;
+      color: #ffffff;
+      margin-bottom: 20px;
+      letter-spacing: -1.5px;
     }
 
-    .final-cta p {
-      font-size: 20px;
-      color: rgba(255,255,255,0.65);
-      margin-bottom: 40px;
+    .final-cta > .container > p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 44px;
     }
 
     .btn-primary-light {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: var(--neutral);
-      color: var(--tertiary);
+      gap: 10px;
+      background: var(--tertiary);
+      color: #ffffff;
       text-decoration: none;
       font-size: 16px;
       font-weight: 700;
-      padding: 0 32px;
-      height: 52px;
-      border-radius: 26px;
-      transition: background 0.15s;
+      padding: 0 36px;
+      height: 56px;
+      border-radius: 28px;
+      transition: background 0.15s, transform 0.15s;
+      box-shadow: 0 4px 24px rgba(6,105,255,0.4);
     }
 
-    .btn-primary-light:hover { background: #f0f0f0; }
+    .btn-primary-light:hover {
+      background: #0558E0;
+      transform: translateY(-1px);
+    }
 
     .cta-note {
-      margin-top: 14px;
-      font-size: 14px;
-      color: rgba(255,255,255,0.5);
+      margin-top: 20px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.3);
     }
 
     /* ── SCREENSHOT ── */
@@ -1164,8 +1188,9 @@
       .tcard-hidden { display: none; }
       .testimonials-more { display: block; }
 
-      .final-cta h2 { font-size: 30px; line-height: 40px; }
-      .final-cta p { font-size: 17px; }
+      .final-cta { padding: 80px 0 72px; }
+      .final-cta h2 { font-size: 32px; line-height: 42px; letter-spacing: -1px; }
+      .final-cta > .container > p { font-size: 16px; }
       .btn-primary-light { width: 100%; justify-content: center; }
 
       footer .container { flex-direction: column; align-items: flex-start; gap: 20px; }
