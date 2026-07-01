@@ -1032,8 +1032,10 @@
     .tool-item {
       display: flex;
       align-items: flex-start;
-      gap: 14px;
+      gap: 12px;
     }
+
+    .tool-item-header { display: contents; }
 
     .tool-icon {
       width: 32px;
@@ -1047,8 +1049,10 @@
       transition: transform 0.3s ease;
     }
 
-    .tool-item:hover .tool-icon {
-      transform: scale(1.15);
+    @media (hover: hover) {
+      .tool-item:hover .tool-icon {
+        transform: scale(1.15);
+      }
     }
 
     .tool-icon img, .tool-icon svg { width: 100%; height: 100%; display: block; object-fit: cover; }
@@ -1056,8 +1060,9 @@
     .tool-dot { display: none; }
 
     .tool-item-text {}
-    .tool-name { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 2px; }
-    .tool-desc { font-size: 13px; color: var(--muted); line-height: 20px; }
+    .tool-inline { font-size: 13px; line-height: 20px; }
+    .tool-name { font-weight: 700; color: var(--primary); }
+    .tool-desc { color: var(--muted); }
 
     /* ── FINAL CTA ── */
     .final-cta {
@@ -1561,30 +1566,21 @@
           <div class="tool-icon" style="background:transparent;">
             <img src="claude.png" alt="Claude">
           </div>
-          <div class="tool-item-text">
-            <div class="tool-name">Claude Code</div>
-            <div class="tool-desc">Built the extension and this page - architecture, logic, CSS.</div>
-          </div>
+          <div class="tool-inline"><span class="tool-name">Claude Code:</span> <span class="tool-desc">Built the extension and this page - architecture, logic, CSS.</span></div>
         </div>
 
         <div class="tool-item">
           <div class="tool-icon" style="background:transparent;">
             <img src="vercel.png" alt="Vercel">
           </div>
-          <div class="tool-item-text">
-            <div class="tool-name">Vercel</div>
-            <div class="tool-desc">Hosts this page. Push to git, live in seconds.</div>
-          </div>
+          <div class="tool-inline"><span class="tool-name">Vercel:</span> <span class="tool-desc">Hosts this page. Push to git, live in seconds.</span></div>
         </div>
 
         <div class="tool-item">
           <div class="tool-icon" style="background:transparent;">
             <img src="posthog.png" alt="PostHog">
           </div>
-          <div class="tool-item-text">
-            <div class="tool-name">PostHog</div>
-            <div class="tool-desc">Analytics - tracks installs, clicks, and drop-offs.</div>
-          </div>
+          <div class="tool-inline"><span class="tool-name">PostHog:</span> <span class="tool-desc">Analytics - tracks installs, clicks, and drop-offs.</span></div>
         </div>
 
         <div class="made-here-wrap">
