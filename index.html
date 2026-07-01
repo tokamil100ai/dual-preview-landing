@@ -1001,9 +1001,11 @@
       aspect-ratio: 4/3;
     }
 
-    .made-here-img:hover {
-      transform: scale(2);
-      box-shadow: 6px 10px 28px rgba(0,0,0,0.2);
+    @media (hover: hover) {
+      .made-here-img:hover {
+        transform: scale(2);
+        box-shadow: 6px 10px 28px rgba(0,0,0,0.2);
+      }
     }
 
     .tools-panel {
