@@ -992,22 +992,26 @@
       margin-bottom: 16px;
     }
 
-    .made-here-img {
-      width: 100%;
+    .desk-media {
+      position: relative;
       border-radius: 8px;
-      box-shadow: none;
-      display: block;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      object-fit: cover;
+      overflow: visible;
       aspect-ratio: 4/3;
+      transform-origin: top center;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
     }
-
-    @media (hover: hover) {
-      .made-here-img:hover {
-        transform: scale(2);
-        box-shadow: 6px 10px 28px rgba(0,0,0,0.2);
-      }
+    .desk-media img,
+    .desk-media video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
     }
+    .desk-media img { opacity: 1; transition: opacity 0.4s ease; }
+    .desk-media video { opacity: 0; transition: opacity 0.4s ease; }
 
     .tools-panel {
       background: var(--surface-alt);
@@ -1589,7 +1593,10 @@
 
         <div class="made-here-wrap">
           <h3>Made here</h3>
-          <img src="desk.jpg" alt="My desk" class="made-here-img">
+          <div class="desk-media" id="deskMedia">
+            <img src="desk-placholder.jpg" alt="My desk" id="deskImg">
+            <video src="desk-wideo.mp4" id="deskVideo" muted playsinline preload="metadata"></video>
+          </div>
         </div>
 
       </div>
@@ -1708,6 +1715,88 @@
       }, 150);
     }
   });
+
+  // ── DESK MEDIA: hover/tap ping-pong video ──
+  const deskMedia = document.getElementById('deskMedia');
+  const deskImg   = document.getElementById('deskImg');
+  const deskVideo = document.getElementById('deskVideo');
+
+  if (deskMedia && deskImg && deskVideo) {
+    let ppDir = 1;
+    let ppRAF = null;
+    let lastTs = null;
+    let deskActive = false;
+
+    function stopPingPong() {
+      deskVideo.pause();
+      if (ppRAF) { cancelAnimationFrame(ppRAF); ppRAF = null; }
+      lastTs = null;
+    }
+
+    function pingPongLoop(ts) {
+      if (!deskActive) return;
+      const delta = lastTs !== null ? (ts - lastTs) / 1000 : 0;
+      lastTs = ts;
+
+      if (ppDir === 1) {
+        if (deskVideo.ended || deskVideo.currentTime >= deskVideo.duration - 0.05) {
+          deskVideo.pause();
+          ppDir = -1;
+          lastTs = ts;
+        } else if (deskVideo.paused) {
+          deskVideo.play().catch(() => {});
+        }
+      } else {
+        deskVideo.currentTime = Math.max(0, deskVideo.currentTime - delta);
+        if (deskVideo.currentTime <= 0.02) {
+          deskVideo.currentTime = 0;
+          ppDir = 1;
+          deskVideo.play().catch(() => {});
+        }
+      }
+
+      ppRAF = requestAnimationFrame(pingPongLoop);
+    }
+
+    function startPingPong() {
+      ppDir = 1;
+      lastTs = null;
+      deskVideo.currentTime = 0;
+      ppRAF = requestAnimationFrame(pingPongLoop);
+    }
+
+    function showVideo(scale) {
+      deskActive = true;
+      deskMedia.style.transform = `scale(${scale})`;
+      deskMedia.style.boxShadow = '0 16px 40px rgba(0,0,0,0.2)';
+      deskVideo.style.opacity = '1';
+      deskImg.style.opacity = '0';
+      startPingPong();
+    }
+
+    function hideVideo() {
+      deskActive = false;
+      deskMedia.style.transform = 'scale(1)';
+      deskMedia.style.boxShadow = 'none';
+      deskVideo.style.opacity = '0';
+      deskImg.style.opacity = '1';
+      stopPingPong();
+    }
+
+    const isTouchDevice = window.matchMedia('(hover: none)').matches;
+
+    if (!isTouchDevice) {
+      deskMedia.addEventListener('mouseenter', () => showVideo(1.5));
+      deskMedia.addEventListener('mouseleave', hideVideo);
+    } else {
+      let deskZoomed = false;
+      deskMedia.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        deskZoomed = !deskZoomed;
+        if (deskZoomed) showVideo(1.2); else hideVideo();
+      });
+    }
+  }
 </script>
 </body>
 </html>
