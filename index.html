@@ -1806,6 +1806,12 @@
         deskZoomed = !deskZoomed;
         if (deskZoomed) showVideo(1.2); else hideVideo();
       });
+      window.addEventListener('scroll', () => {
+        if (deskZoomed) {
+          deskZoomed = false;
+          hideVideo();
+        }
+      }, { passive: true });
     }
   }
 </script>
