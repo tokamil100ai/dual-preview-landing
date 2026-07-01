@@ -1101,60 +1101,42 @@
     /* ── FOOTER ── */
     footer {
       background: #0A0A0A;
-      padding: 64px 0 48px;
+      padding: 20px 0;
       border-top: 1px solid rgba(255,255,255,0.08);
     }
 
     footer .container {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 40px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    .footer-brand {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .footer-brand-name {
-      font-size: 20px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -0.3px;
-    }
-
-    .footer-brand-tagline {
-      font-size: 14px;
-      color: rgba(255,255,255,0.4);
-    }
+    .footer-brand { display: none; }
+    .footer-brand-name { display: none; }
+    .footer-brand-tagline { display: none; }
 
     .footer-links {
       display: flex;
       align-items: center;
-      gap: 32px;
+      gap: 24px;
     }
 
     .footer-links a {
-      font-size: 14px;
-      color: rgba(255,255,255,0.45);
+      font-size: 13px;
+      color: rgba(255,255,255,0.35);
       text-decoration: none;
       transition: color 0.15s;
     }
 
     .footer-links a:hover {
-      color: #fff;
+      color: rgba(255,255,255,0.7);
     }
 
     .footer-copy {
       font-size: 12px;
       color: rgba(255,255,255,0.2);
-      border-top: 1px solid rgba(255,255,255,0.07);
-      width: 100%;
-      text-align: center;
-      padding-top: 32px;
     }
 
     /* ── SVG ICONS ── */
