@@ -916,6 +916,7 @@
       padding-top: 72px;
     }
 
+
     .about-photo-wrap {
       border-radius: 12px;
       overflow: hidden;
@@ -1270,7 +1271,7 @@
   <div class="container">
     <div class="hero-head">
       <img class="hero-chrome-badge-mobile" src="badge.png" alt="Available in the Chrome Web Store">
-      <div class="hero-badge">Dual Preview — Chrome Extension</div>
+      <div class="hero-badge">Dual Preview - Chrome Extension</div>
       <h1>Start seeing mobile the way users do.</h1>
     </div>
     <div class="hero-subtitle">
@@ -1299,7 +1300,7 @@
   <div class="container">
     <div class="problem-inner">
       <h2 class="section-heading" style="margin-top:0; margin-bottom:20px;">Design, test, and demo without the clunky workflow.</h2>
-      <p class="section-subtext">Mobile testing shouldn't mean non-stop window tweaking. Dual Preview gives you a unified workspace to analyze how other sites scale, test your own features in real-time, and present polished responsive designs to clients or stakeholders. One tool for your entire workflow—from initial research to the final Sprint Review.</p>
+      <p class="section-subtext">Mobile testing shouldn't mean non-stop window tweaking. Dual Preview gives you a unified workspace to analyze how other sites scale, test your own features in real-time, and present polished responsive designs to clients or stakeholders. One tool for your entire workflow - from initial research to the final Sprint Review.</p>
     </div>
   </div>
 </section>
@@ -1323,7 +1324,7 @@
 
         <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-14z" /><path d="M11 4h2" /><path d="M12 17v.01" /></svg>
         <h3>Real device viewports</h3>
-        <p>iPhone SE, iPhone 14, Pixel 7, Samsung S23 — precise presets for the phones your users actually own.</p>
+        <p>iPhone SE, iPhone 14, Pixel 7, Samsung S23 - precise presets for the phones your users actually own.</p>
       </div>
 
       <div class="feature-item">
@@ -1337,7 +1338,7 @@
 
         <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2" /><path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>
         <h3>Screenshot both panels</h3>
-        <p>Capture mobile and desktop in one image. Share in Slack, drop into Figma, paste into a ticket — everyone sees both.</p>
+        <p>Capture mobile and desktop in one image. Share in Slack, drop into Figma, paste into a ticket - everyone sees both.</p>
       </div>
 
       <div class="feature-item">
@@ -1351,7 +1352,7 @@
 
         <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M5.636 19.364a9 9 0 1 1 12.728 0" /><path d="M16 9l-4 4" /></svg>
         <h3>Open in PageSpeed</h3>
-        <p>One click from any panel to PageSpeed Insights — check performance of the exact URL you're reviewing.</p>
+        <p>One click from any panel to PageSpeed Insights - check performance of the exact URL you're reviewing.</p>
       </div>
 
     </div>
@@ -1369,7 +1370,7 @@
       <div class="persona-card">
         <div class="persona-role">Designers & Researchers</div>
         <h3>Test and research across screens instantly</h3>
-        <p>Check your designs against real mobile screens as you work. Easy to benchmark competitors and research how others solve the same problems — just paste any URL.</p>
+        <p>Check your designs against real mobile screens as you work. Easy to benchmark competitors and research how others solve the same problems - just paste any URL.</p>
       </div>
       <div class="persona-card">
         <div class="persona-role">Frontend Developers</div>
@@ -1384,7 +1385,7 @@
       <div class="persona-card">
         <div class="persona-role">Content & Marketing</div>
         <h3>Preview before you publish</h3>
-        <p>Check how articles, landing pages, and campaign creatives look on a phone — before hitting publish.</p>
+        <p>Check how articles, landing pages, and campaign creatives look on a phone - before hitting publish.</p>
       </div>
     </div>
   </div>
@@ -1502,13 +1503,15 @@
       <div class="about-text">
         <div style="margin-bottom:28px;">
 <div style="display:flex; align-items:center; gap:20px;">
-            <div id="avatarWrap" style="width:72px; height:72px; border-radius:50%; overflow:hidden; flex-shrink:0; background:#e4e4e7; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor:pointer;" onmouseenter="this.style.transform='scale(2)';this.style.boxShadow='0 16px 40px rgba(0,0,0,0.25)'" onmouseleave="this.style.transform='scale(1)';this.style.boxShadow='none'">
-              <video id="avatarVideo" src="wideo-avatar.mp4" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover; display:block;"></video>
+            <div class="avatar-glow-wrap" style="flex-shrink:0;">
+              <div id="avatarWrap" style="width:72px; height:72px; border-radius:50%; overflow:hidden; background:#e4e4e7; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor:pointer; position:relative; z-index:1;" onmouseenter="this.style.transform='scale(2)';this.style.boxShadow='0 16px 40px rgba(0,0,0,0.25)'" onmouseleave="this.style.transform='scale(1)';this.style.boxShadow='none'">
+                <video id="avatarVideo" src="wideo-avatar.mp4" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover; display:block;"></video>
+              </div>
             </div>
             <h2 style="margin:0;">Hey, I'm Kamil.</h2>
           </div>
         </div>
-        <p>Why did I build this? As a UX designer, I really wanted to get my hands dirty with AI and build something that solves a real problem. That meant going all the way — from idea to shipping, marketing, maintaining, and growing it. So this is it. Sure, it ain't much, but it's honest work.</p>
+        <p>Why did I build this? As a UX designer, I really wanted to get my hands dirty with AI and build something that solves a real problem. That meant going all the way - from idea to shipping, marketing, maintaining, and growing it. So this is it. Sure, it ain't much, but it's honest work.</p>
         <p>I've spent 15+ years working in product, yet this project gave me a whole new kind of freedom. Building Dual Preview took real time and a lot of iteration. Don't let anyone tell you AI makes things happen instantly.</p>
         <p>Still, the process was mostly fun, and the learning was real. It feels like I've been walking my whole life and someone just handed me a bike.</p>
         <p>If it saves you even a few minutes a week, it was worth building.</p>
@@ -1527,7 +1530,7 @@
           </div>
           <div class="tool-item-text">
             <div class="tool-name">Claude Code</div>
-            <div class="tool-desc">Built the entire extension and landing page with Claude — from architecture to CSS.</div>
+            <div class="tool-desc">Built the entire extension and landing page with Claude - from architecture to CSS.</div>
           </div>
         </div>
 
