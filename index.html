@@ -149,6 +149,8 @@
       align-items: center;
       gap: 32px;
       list-style: none;
+      margin-left: auto;
+      margin-right: 32px;
     }
 
     .nav-links a {
@@ -1299,7 +1301,7 @@
       <li><a href="#who">Who it's for</a></li>
       <li><a href="#about">About</a></li>
     </ul>
-    <a href="#install" id="nav-cta" class="btn-primary" style="height:44px; font-size:14px; padding:0 24px; border-radius:22px; border:none; opacity:0; pointer-events:none; transition: opacity 0.25s ease;">Get it on Chrome</a>
+    <a href="#install" id="nav-cta" class="btn-primary" style="height:44px; font-size:14px; padding:0 24px; border-radius:22px; border:none; opacity:0; pointer-events:none; max-width:0; overflow:hidden; white-space:nowrap; transition: opacity 0.35s ease, max-width 0.35s ease, padding 0.35s ease;">Get it on Chrome</a>
   </div>
 </nav>
 
@@ -1690,6 +1692,8 @@
       const heroCtaBottom = heroCta.getBoundingClientRect().bottom;
       const visible = heroCtaBottom < 68;
       navCta.style.opacity = visible ? '1' : '0';
+      navCta.style.maxWidth = visible ? '200px' : '0';
+      navCta.style.padding = visible ? '0 24px' : '0';
       navCta.style.pointerEvents = visible ? 'auto' : 'none';
     }
   }, { passive: true });
