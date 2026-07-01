@@ -1262,7 +1262,7 @@
       <li><a href="#who">Who it's for</a></li>
       <li><a href="#about">About</a></li>
     </ul>
-    <a href="#install" class="btn-primary" style="height:44px; font-size:14px; padding:0 24px; border-radius:22px; border:none;">Get it on Chrome</a>
+    <a href="#install" id="nav-cta" class="btn-primary" style="height:44px; font-size:14px; padding:0 24px; border-radius:22px; border:none; opacity:0; pointer-events:none; transition: opacity 0.25s ease;">Get it on Chrome</a>
   </div>
 </nav>
 
@@ -1645,10 +1645,18 @@
 
   const nav = document.querySelector('.nav');
   const heroSection = document.querySelector('.hero');
+  const navCta = document.getElementById('nav-cta');
+  const heroCta = document.getElementById('install');
   window.addEventListener('scroll', () => {
     if (window.innerWidth <= 900) {
       const heroBottom = heroSection.getBoundingClientRect().bottom;
       nav.classList.toggle('nav-visible', heroBottom < 0);
+    }
+    if (navCta && heroCta) {
+      const heroCtaBottom = heroCta.getBoundingClientRect().bottom;
+      const visible = heroCtaBottom < 68;
+      navCta.style.opacity = visible ? '1' : '0';
+      navCta.style.pointerEvents = visible ? 'auto' : 'none';
     }
   }, { passive: true });
 
