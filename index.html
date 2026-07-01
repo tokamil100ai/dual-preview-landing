@@ -112,14 +112,17 @@
 
     /* ── NAV ── */
     .nav {
-      background: var(--neutral);
-      height: 87px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      height: 68px;
       display: flex;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 100;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 24px rgba(0,0,0,0.04);
     }
 
     .nav .container {
@@ -155,15 +158,15 @@
     .btn-primary {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       background: var(--tertiary);
       color: var(--on-primary);
       text-decoration: none;
       font-size: 16px;
-      font-weight: 700;
-      padding: 0 32px;
-      height: 52px;
-      border-radius: 26px;
+      font-weight: 600;
+      padding: 0 36px;
+      height: 56px;
+      border-radius: 32px;
       border: none;
       cursor: pointer;
       transition: background 0.15s;
@@ -175,21 +178,21 @@
     .btn-secondary {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: var(--surface-alt);
-      color: var(--primary);
+      gap: 6px;
+      background: none;
+      color: var(--tertiary);
       text-decoration: none;
       font-size: 16px;
-      font-weight: 700;
-      padding: 0 32px;
-      height: 52px;
-      border-radius: 26px;
+      font-weight: 600;
+      padding: 0;
+      height: 56px;
       border: none;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: opacity 0.15s;
+      white-space: nowrap;
     }
 
-    .btn-secondary:hover { background: #EBEBEB; }
+    .btn-secondary:hover { opacity: 0.7; }
 
     .badge {
       display: inline-block;
@@ -203,18 +206,17 @@
 
     /* ── HERO ── */
     .hero {
-      padding: 80px 0 100px;
+      padding: 72px 0 0;
       background: var(--neutral);
     }
 
-    .hero .container {
+    .hero-cols {
       display: grid;
-      grid-template-columns: 45fr 55fr;
-      gap: 56px;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
       align-items: start;
+      margin-bottom: 56px;
     }
-
-    .hero-video-mobile { display: none; }
 
     .hero-left {}
 
@@ -223,76 +225,60 @@
       color: var(--tertiary);
       font-size: 12px;
       font-weight: 600;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       letter-spacing: 0.01em;
     }
 
     .hero h1 {
-      font-size: 52px;
+      font-size: 60px;
       font-weight: 700;
-      line-height: 1.08;
+      line-height: 1.06;
       color: var(--primary);
-      letter-spacing: -1.5px;
-      margin-bottom: 28px;
-    }
-
-    .hero p {
-      font-size: 17px;
-      font-weight: 400;
-      line-height: 28px;
-      color: var(--secondary);
-      margin-bottom: 28px;
+      letter-spacing: -2px;
+      margin-bottom: 36px;
     }
 
     .hero-cta {
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-    }
-
-    .hero-testimonial {
-      display: flex;
-      align-items: flex-start;
       gap: 14px;
-      padding-top: 28px;
+      flex-wrap: wrap;
     }
 
-    .hero-testimonial-avatar {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: var(--surface-alt);
-      flex-shrink: 0;
-      overflow: hidden;
+    .hero-right {
+      padding-top: 54px;
     }
 
-    .hero-testimonial-text {
-      font-size: 15px;
-      line-height: 24px;
+    .hero-right p {
+      font-size: 19px;
+      font-weight: 400;
+      line-height: 30px;
       color: var(--secondary);
     }
 
-    .hero-testimonial-author {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-top: 6px;
+    .video-rotate-hint {
+      display: none;
     }
 
-    .hero-right {}
+    .hero-video-wrap {
+      padding-bottom: 96px;
+    }
+
+    .hero-video-wrap video {
+      display: block;
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: rgba(0,0,0,0.18) 0px 32px 72px;
+    }
 
     @media (max-width: 900px) {
-      .hero .container {
-        display: flex;
-        flex-direction: column;
-        gap: 40px;
+      .hero-cols {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        margin-bottom: 32px;
       }
-      .hero-left { order: 1; }
-      .hero-video-mobile { display: block !important; }
-      .hero-right { display: none; }
-      .hero-testimonial { order: 3; }
+      .hero h1 { font-size: 40px; }
+      .hero-right { padding-top: 0; }
     }
 
     /* ── PRODUCT WINDOW ── */
@@ -511,7 +497,7 @@
     }
 
     .problem-inner {
-      text-align: center;
+      text-align: left;
     }
 
     .problem .badge {
@@ -584,18 +570,19 @@
     .feature-icon { display: block; width: 28px; height: 28px; margin-bottom: 16px; color: var(--tertiary); }
 
     .feature-item h3 {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--primary);
-      margin-bottom: 10px;
-      line-height: 26px;
+      margin-bottom: 8px;
+      line-height: 24px;
+      letter-spacing: -0.2px;
     }
 
     .feature-item p {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 400;
-      line-height: 25px;
-      color: var(--secondary);
+      line-height: 23px;
+      color: var(--muted);
     }
 
     /* ── FEATURE SECTIONS (large alternating) ── */
@@ -1140,6 +1127,9 @@
     @media (max-width: 900px) {
       :root { --section-pad: 72px; --pad-x: 24px; }
 
+      .nav-links { display: none; }
+      .nav { height: 64px; }
+
       .hero h1 { font-size: 40px; }
       .section-heading, .feature-text h2, .about-text h2, .final-cta h2 { font-size: 36px; line-height: 46px; }
       .features-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
@@ -1149,6 +1139,27 @@
       .about-photo-wrap { padding-top: 0; }
       .tools-list { grid-template-columns: 1fr 1fr; gap: 24px; }
       .personas-grid { grid-template-columns: 1fr; }
+
+      .video-rotate-hint {
+        display: block;
+        text-align: center;
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 14px;
+        letter-spacing: 0.01em;
+      }
+
+      #heroVideo.video-fs {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        border-radius: 0;
+        object-fit: contain;
+        background: #000;
+        box-shadow: none;
+      }
     }
 
     @media (max-width: 600px) {
@@ -1201,43 +1212,41 @@
 </head>
 <body>
 
-<!-- STICKY BAR -->
-<div class="sticky-bar" id="stickyBar">
+<!-- NAV -->
+<nav class="nav">
   <div class="container">
-    <div>
-      <span class="sticky-bar-logo">Dual Preview</span>
-      <span class="sticky-bar-tagline"> — See mobile and desktop at the same time. Free.</span>
-    </div>
-    <a href="#install" class="btn-primary" style="height:40px; font-size:14px; padding:0 20px; border-radius:20px;">Get it on Chrome</a>
+    <a href="/" class="nav-logo"><img src="https://developer.chrome.com/static/docs/webstore/branding/image/YT2Grfi9vEBa2wAPzhWa.png" alt="Available in the Chrome Web Store" style="height:48px; display:block;"></a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#who">Who it's for</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+    <a href="#install" class="btn-primary" style="height:44px; font-size:14px; padding:0 24px; border-radius:22px; border:none;">Get it on Chrome</a>
   </div>
-</div>
+</nav>
 
 <!-- HERO -->
 <section class="hero">
   <div class="container">
-    <div class="hero-left">
-      <img src="https://developer.chrome.com/static/docs/webstore/branding/image/YT2Grfi9vEBa2wAPzhWa.png" alt="Available in the Chrome Web Store" style="height:52px; margin-bottom:16px; display:block;">
-      <div class="hero-badge">Dual Preview — Chrome Extension</div>
-      <h1>Desktop Workflow, Mobile Reality</h1>
-      <video class="hero-video-mobile" src="video-top.mp4" autoplay loop muted playsinline style="width:100%; border-radius:12px; display:none; box-shadow: rgba(0,0,0,0.2) 0px 16px 40px; margin-bottom:24px;"></video>
-      <p>80% of internet traffic is on mobile, yet websites are built on desktop. Stop guessing how your site looks on a phone — Dual Preview is a free Chrome extension that shows both views at the same time.</p>
-      <div class="hero-cta">
-        <a href="#install" class="btn-primary" id="install">
-          <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:white;border-radius:50%;flex-shrink:0;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48" width="18" height="18"><defs><linearGradient id="cg-a" x1="3.2173" y1="15" x2="44.7812" y2="15" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#d93025"/><stop offset="1" stop-color="#ea4335"/></linearGradient><linearGradient id="cg-b" x1="20.7219" y1="47.6791" x2="41.5039" y2="11.6837" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fcc934"/><stop offset="1" stop-color="#fbbc04"/></linearGradient><linearGradient id="cg-c" x1="26.5981" y1="46.5015" x2="5.8161" y2="10.506" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1e8e3e"/><stop offset="1" stop-color="#34a853"/></linearGradient></defs><circle cx="24" cy="23.9947" r="12" style="fill:#fff"/><path d="M24,12H44.7812a23.9939,23.9939,0,0,0-41.5639.0029L13.6079,30l.0093-.0024A11.9852,11.9852,0,0,1,24,12Z" style="fill:url(#cg-a)"/><circle cx="24" cy="24" r="9.5" style="fill:#1a73e8"/><path d="M34.3913,30.0029,24.0007,48A23.994,23.994,0,0,0,44.78,12.0031H23.9989l-.0025.0093A11.985,11.985,0,0,1,34.3913,30.0029Z" style="fill:url(#cg-b)"/><path d="M13.6086,30.0031,3.218,12.006A23.994,23.994,0,0,0,24.0025,48L34.3931,30.0029l-.0067-.0068a11.9852,11.9852,0,0,1-20.7778.007Z" style="fill:url(#cg-c)"/></svg></span>
-          Get it on Chrome
-        </a>
-        <a href="#features" class="btn-secondary">See how it works</a>
-      </div>
-      <div class="hero-testimonial">
-        <div class="hero-testimonial-avatar"><img src="karthick.jpeg" alt="Karthick" style="width:100%;height:100%;object-fit:cover;"></div>
-        <div>
-          <div class="hero-testimonial-text">Finally I can review mobile and desktop in the same window. This is exactly what was missing from my workflow.</div>
-          <div class="hero-testimonial-author">Karthick, FULL Creative</div>
+    <div class="hero-cols">
+      <div class="hero-left">
+        <div class="hero-badge">Dual Preview — Chrome Extension</div>
+        <h1>Desktop Workflow, Mobile Reality</h1>
+        <div class="hero-cta">
+          <a href="#install" class="btn-primary" id="install">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:white;border-radius:50%;flex-shrink:0;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48" width="18" height="18"><defs><linearGradient id="cg-a" x1="3.2173" y1="15" x2="44.7812" y2="15" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#d93025"/><stop offset="1" stop-color="#ea4335"/></linearGradient><linearGradient id="cg-b" x1="20.7219" y1="47.6791" x2="41.5039" y2="11.6837" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fcc934"/><stop offset="1" stop-color="#fbbc04"/></linearGradient><linearGradient id="cg-c" x1="26.5981" y1="46.5015" x2="5.8161" y2="10.506" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1e8e3e"/><stop offset="1" stop-color="#34a853"/></linearGradient></defs><circle cx="24" cy="23.9947" r="12" style="fill:#fff"/><path d="M24,12H44.7812a23.9939,23.9939,0,0,0-41.5639.0029L13.6079,30l.0093-.0024A11.9852,11.9852,0,0,1,24,12Z" style="fill:url(#cg-a)"/><circle cx="24" cy="24" r="9.5" style="fill:#1a73e8"/><path d="M34.3913,30.0029,24.0007,48A23.994,23.994,0,0,0,44.78,12.0031H23.9989l-.0025.0093A11.985,11.985,0,0,1,34.3913,30.0029Z" style="fill:url(#cg-b)"/><path d="M13.6086,30.0031,3.218,12.006A23.994,23.994,0,0,0,24.0025,48L34.3931,30.0029l-.0067-.0068a11.9852,11.9852,0,0,1-20.7778.007Z" style="fill:url(#cg-c)"/></svg></span>
+            Get it on Chrome
+          </a>
+          <a href="#features" class="btn-secondary">See how it works <span>›</span></a>
         </div>
       </div>
+      <div class="hero-right">
+        <p>80% of internet traffic is on mobile, yet websites are built on desktop. Stop guessing how your site looks on a phone — Dual Preview is a free Chrome extension that shows both views at the same time.</p>
+      </div>
     </div>
-    <div class="hero-right" style="padding-left:24px; padding-top:72px;">
-      <video src="video-top.mp4" autoplay loop muted playsinline style="width:100%; border-radius:12px; display:block; box-shadow: rgba(0,0,0,0.2) 0px 24px 50px;"></video>
+    <div class="hero-video-wrap">
+      <video id="heroVideo" src="video-top.mp4" autoplay loop muted playsinline></video>
+      <p class="video-rotate-hint">↺ Rotate your screen to watch fullscreen</p>
     </div>
   </div>
 </section>
@@ -1247,9 +1256,8 @@
 <section class="problem">
   <div class="container">
     <div class="problem-inner">
-      <h2 class="section-heading" style="margin-top:0; margin-bottom:20px; max-width: 28ch; margin-left:auto; margin-right:auto;">Staring at a desktop monitor hides the mobile reality.</h2>
+      <h2 class="section-heading" style="margin-top:0; margin-bottom:20px; max-width: 28ch;">Staring at a desktop monitor hides the mobile reality.</h2>
       <p class="section-subtext">Current mobile testing is difficult, inefficient, and lacks full control. Dual Preview fixes this. The free Chrome extension shows both screens side-by-side.</p>
-      <img src="screen.jpg" alt="Dual Preview extension in action" class="screenshot-img">
     </div>
   </div>
 </section>
@@ -1536,6 +1544,37 @@
     const heroBottom = hero.getBoundingClientRect().bottom;
     stickyBar.classList.toggle('visible', heroBottom < 0);
   });
+
+  const heroVideo = document.getElementById('heroVideo');
+  let savedScrollY = 0;
+
+  function isLandscape() {
+    return window.innerWidth > window.innerHeight;
+  }
+
+  function enterVideoFS() {
+    savedScrollY = window.scrollY;
+    heroVideo.classList.add('video-fs');
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+  }
+
+  function exitVideoFS() {
+    heroVideo.classList.remove('video-fs');
+    document.body.style.overflow = '';
+    window.scrollTo(0, savedScrollY);
+  }
+
+  function handleOrientation() {
+    if (window.innerWidth <= 900) {
+      setTimeout(() => {
+        isLandscape() ? enterVideoFS() : exitVideoFS();
+      }, 120);
+    }
+  }
+
+  window.addEventListener('orientationchange', handleOrientation);
+  window.addEventListener('resize', handleOrientation);
 </script>
 </body>
 </html>
