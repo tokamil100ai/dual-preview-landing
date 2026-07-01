@@ -1800,13 +1800,14 @@
       deskMedia.addEventListener('mouseenter', () => showVideo(1.5));
       deskMedia.addEventListener('mouseleave', hideVideo);
     } else {
-      // mobile: autoplay looping video, tap to zoom/unzoom
-      deskVideo.loop = true;
-      deskVideo.play().catch(() => {});
+      // mobile: autoplay ping-pong, tap to zoom/unzoom
+      deskActive = true;
       deskVideo.addEventListener('canplay', () => {
         deskImg.style.opacity = '0';
         deskVideo.style.opacity = '1';
+        startPingPong();
       }, { once: true });
+      deskVideo.load();
 
       let deskZoomed = false;
       deskMedia.addEventListener('touchend', (e) => {
