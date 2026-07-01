@@ -256,6 +256,10 @@
       color: var(--secondary);
     }
 
+    .video-rotate-hint {
+      display: none;
+    }
+
     .hero-video-wrap {
       padding-bottom: 96px;
     }
@@ -1135,6 +1139,27 @@
       .about-photo-wrap { padding-top: 0; }
       .tools-list { grid-template-columns: 1fr 1fr; gap: 24px; }
       .personas-grid { grid-template-columns: 1fr; }
+
+      .video-rotate-hint {
+        display: block;
+        text-align: center;
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 14px;
+        letter-spacing: 0.01em;
+      }
+
+      #heroVideo.video-fs {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        border-radius: 0;
+        object-fit: contain;
+        background: #000;
+        box-shadow: none;
+      }
     }
 
     @media (max-width: 600px) {
@@ -1220,7 +1245,8 @@
       </div>
     </div>
     <div class="hero-video-wrap">
-      <video src="video-top.mp4" autoplay loop muted playsinline></video>
+      <video id="heroVideo" src="video-top.mp4" autoplay loop muted playsinline></video>
+      <p class="video-rotate-hint">↺ Rotate your screen to watch fullscreen</p>
     </div>
   </div>
 </section>
@@ -1518,6 +1544,37 @@
     const heroBottom = hero.getBoundingClientRect().bottom;
     stickyBar.classList.toggle('visible', heroBottom < 0);
   });
+
+  const heroVideo = document.getElementById('heroVideo');
+  let savedScrollY = 0;
+
+  function isLandscape() {
+    return window.innerWidth > window.innerHeight;
+  }
+
+  function enterVideoFS() {
+    savedScrollY = window.scrollY;
+    heroVideo.classList.add('video-fs');
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+  }
+
+  function exitVideoFS() {
+    heroVideo.classList.remove('video-fs');
+    document.body.style.overflow = '';
+    window.scrollTo(0, savedScrollY);
+  }
+
+  function handleOrientation() {
+    if (window.innerWidth <= 900) {
+      setTimeout(() => {
+        isLandscape() ? enterVideoFS() : exitVideoFS();
+      }, 120);
+    }
+  }
+
+  window.addEventListener('orientationchange', handleOrientation);
+  window.addEventListener('resize', handleOrientation);
 </script>
 </body>
 </html>
