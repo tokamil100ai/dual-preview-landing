@@ -261,11 +261,36 @@
       display: none;
     }
 
-    .hero-video-wrap video {
-      display: block;
-      width: 100%;
+    .video-container {
+      position: relative;
+      aspect-ratio: 1280 / 688;
+      background: #fff;
       border-radius: 16px;
+      overflow: hidden;
       box-shadow: rgba(0,0,0,0.18) 0px 32px 72px;
+    }
+
+    .video-placeholder {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.4s;
+    }
+
+    .video-container video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .video-container video.ready {
+      opacity: 1;
     }
 
     @media (max-width: 900px) {
@@ -1153,16 +1178,16 @@
         letter-spacing: 0.01em;
       }
 
-      #heroVideo.video-fs {
+      .video-container.video-fs {
         position: fixed;
         inset: 0;
         width: 100vw;
         height: 100vh;
         z-index: 9999;
         border-radius: 0;
-        object-fit: contain;
-        background: #000;
+        aspect-ratio: unset;
         box-shadow: none;
+        background: #000;
       }
     }
 
@@ -1240,7 +1265,10 @@
       <p>80% of internet traffic is on mobile, yet websites are built on desktop. Stop guessing how your site looks on a phone — Dual Preview is a free Chrome extension that shows both views at the same time.</p>
     </div>
     <div class="hero-video-wrap">
-      <video id="heroVideo" src="video-top.mp4" autoplay loop muted playsinline></video>
+      <div class="video-container">
+        <img class="video-placeholder" src="placeholder-wideo.jpg" alt="">
+        <video id="heroVideo" src="video-top.mp4" autoplay loop muted playsinline></video>
+      </div>
       <p class="video-rotate-hint">↺ Rotate for fullscreen</p>
     </div>
     <div class="hero-cta" id="install">
@@ -1550,19 +1578,25 @@
   const heroVideo = document.getElementById('heroVideo');
   let savedScrollY = 0;
 
+  heroVideo.addEventListener('canplay', () => {
+    heroVideo.classList.add('ready');
+  });
+
   function isLandscape() {
     return window.innerWidth > window.innerHeight;
   }
 
+  const videoContainer = heroVideo.closest('.video-container');
+
   function enterVideoFS() {
     savedScrollY = window.scrollY;
-    heroVideo.classList.add('video-fs');
+    videoContainer.classList.add('video-fs');
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
   }
 
   function exitVideoFS() {
-    heroVideo.classList.remove('video-fs');
+    videoContainer.classList.remove('video-fs');
     document.body.style.overflow = '';
     window.scrollTo(0, savedScrollY);
   }
