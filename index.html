@@ -1354,7 +1354,7 @@
   <div class="container">
     <div class="problem-inner">
       <h2 class="section-heading" style="margin-top:0; margin-bottom:20px;">Design, test, and demo without the clunky workflow.</h2>
-      <p class="section-subtext">Mobile testing shouldn't mean non-stop window tweaking. Dual Preview gives you a unified workspace to analyze how other sites scale, test your own features in real-time, and present polished responsive designs to clients or stakeholders. One tool for your entire workflow - from initial research to the final Sprint Review.</p>
+      <p class="section-subtext">Mobile testing shouldn't mean non-stop window tweaking. Dual Preview gives you a unified workspace to analyze how various sites scale, test your own features in real-time, and present polished responsive designs to clients or stakeholders. One tool for your entire workflow - from initial research to the final Sprint Review.</p>
     </div>
   </div>
 </section>
@@ -1800,18 +1800,21 @@
       deskMedia.addEventListener('mouseenter', () => showVideo(1.5));
       deskMedia.addEventListener('mouseleave', hideVideo);
     } else {
+      // mobile: autoplay looping video, tap to zoom/unzoom
+      deskVideo.loop = true;
+      deskVideo.play().catch(() => {});
+      deskVideo.addEventListener('canplay', () => {
+        deskImg.style.opacity = '0';
+        deskVideo.style.opacity = '1';
+      }, { once: true });
+
       let deskZoomed = false;
       deskMedia.addEventListener('touchend', (e) => {
         e.preventDefault();
         deskZoomed = !deskZoomed;
-        if (deskZoomed) showVideo(1.2); else hideVideo();
+        deskMedia.style.transform = deskZoomed ? 'scale(1.2)' : 'scale(1)';
+        deskMedia.style.boxShadow = deskZoomed ? '0 16px 40px rgba(0,0,0,0.2)' : 'none';
       });
-      window.addEventListener('scroll', () => {
-        if (deskZoomed) {
-          deskZoomed = false;
-          hideVideo();
-        }
-      }, { passive: true });
     }
   }
 </script>
