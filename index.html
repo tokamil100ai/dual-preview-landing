@@ -1021,6 +1021,25 @@
     .desk-media img { opacity: 1; transition: opacity 0.4s ease; }
     .desk-media video { opacity: 0; transition: opacity 0.4s ease; }
 
+    @keyframes desk-nudge {
+      0%            { transform: translateX(0) rotate(0deg); }
+      8%            { transform: translateX(-2px) rotate(-0.25deg); }
+      18%           { transform: translateX(2px) rotate(0.25deg); }
+      27%           { transform: translateX(-1.5px) rotate(-0.15deg); }
+      36%           { transform: translateX(1.5px) rotate(0.15deg); }
+      44%           { transform: translateX(-0.5px) rotate(-0.05deg); }
+      50%, 100%     { transform: translateX(0) rotate(0deg); }
+    }
+
+    @media (hover: hover) {
+      .desk-nudge {
+        animation: desk-nudge 5s ease-in-out 10s infinite;
+      }
+      .desk-nudge:hover {
+        animation-play-state: paused;
+      }
+    }
+
     .tools-panel {
       background: var(--surface-alt);
       padding: 40px;
@@ -1604,9 +1623,11 @@
 
         <div class="made-here-wrap">
           <h3>Made here</h3>
-          <div class="desk-media" id="deskMedia">
-            <img src="desk-placholder.jpg" alt="My desk" id="deskImg">
-            <video src="desk-wideo.mp4" id="deskVideo" muted playsinline preload="metadata"></video>
+          <div class="desk-nudge">
+            <div class="desk-media" id="deskMedia">
+              <img src="desk-placholder.jpg" alt="My desk" id="deskImg">
+              <video src="desk-wideo.mp4" id="deskVideo" muted playsinline preload="metadata"></video>
+            </div>
           </div>
         </div>
 
