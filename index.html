@@ -1735,44 +1735,51 @@
   if (deskMedia && deskImg && deskVideo) {
     let ppDir = 1;
     let ppRAF = null;
-    let lastTs = null;
     let deskActive = false;
+    let seekStart = null;
+    const REVERSE_STEP = 1 / 30; // ~30fps
+    const REVERSE_AT = 13;
+
+    function reverseStep() {
+      if (!deskActive || ppDir !== -1) return;
+      const next = deskVideo.currentTime - REVERSE_STEP;
+      seekStart = performance.now();
+      if (next <= 0) {
+        deskVideo.currentTime = 0;
+        ppDir = 1;
+        deskVideo.play().catch(() => {});
+      } else {
+        deskVideo.currentTime = next;
+      }
+    }
+
+    deskVideo.addEventListener('seeked', () => {
+      if (!deskActive || ppDir !== -1) return;
+      const seekDuration = seekStart !== null ? performance.now() - seekStart : 0;
+      const wait = Math.max(0, REVERSE_STEP * 1000 - seekDuration);
+      setTimeout(reverseStep, wait);
+    });
+
+    deskVideo.addEventListener('timeupdate', () => {
+      if (!deskActive || ppDir !== 1) return;
+      if (deskVideo.currentTime >= REVERSE_AT) {
+        deskVideo.pause();
+        ppDir = -1;
+        reverseStep();
+      }
+    });
 
     function stopPingPong() {
       deskVideo.pause();
       if (ppRAF) { cancelAnimationFrame(ppRAF); ppRAF = null; }
-      lastTs = null;
     }
 
-    function pingPongLoop(ts) {
-      if (!deskActive) return;
-      const delta = lastTs !== null ? (ts - lastTs) / 1000 : 0;
-      lastTs = ts;
-
-      if (ppDir === 1) {
-        if (deskVideo.ended || deskVideo.currentTime >= deskVideo.duration - 0.05) {
-          deskVideo.pause();
-          ppDir = -1;
-          lastTs = ts;
-        } else if (deskVideo.paused) {
-          deskVideo.play().catch(() => {});
-        }
-      } else {
-        deskVideo.currentTime = Math.max(0, deskVideo.currentTime - delta);
-        if (deskVideo.currentTime <= 0.02) {
-          deskVideo.currentTime = 0;
-          ppDir = 1;
-          deskVideo.play().catch(() => {});
-        }
-      }
-
-      ppRAF = requestAnimationFrame(pingPongLoop);
-    }
+    function pingPongLoop() {}
 
     function startPingPong() {
       ppDir = 1;
-      lastTs = null;
       deskVideo.currentTime = 0;
+      deskVideo.play().catch(() => {});
       ppRAF = requestAnimationFrame(pingPongLoop);
     }
 
