@@ -1733,72 +1733,23 @@
   const deskVideo = document.getElementById('deskVideo');
 
   if (deskMedia && deskImg && deskVideo) {
-    let ppDir = 1;
-    let ppRAF = null;
-    let deskActive = false;
-    let seekStart = null;
-    const REVERSE_STEP = 1 / 30; // ~30fps
-    const REVERSE_AT = 13;
-
-    function reverseStep() {
-      if (!deskActive || ppDir !== -1) return;
-      const next = deskVideo.currentTime - REVERSE_STEP;
-      seekStart = performance.now();
-      if (next <= 0) {
-        deskVideo.currentTime = 0;
-        ppDir = 1;
-        deskVideo.play().catch(() => {});
-      } else {
-        deskVideo.currentTime = next;
-      }
-    }
-
-    deskVideo.addEventListener('seeked', () => {
-      if (!deskActive || ppDir !== -1) return;
-      const seekDuration = seekStart !== null ? performance.now() - seekStart : 0;
-      const wait = Math.max(0, REVERSE_STEP * 1000 - seekDuration);
-      setTimeout(reverseStep, wait);
-    });
-
-    deskVideo.addEventListener('timeupdate', () => {
-      if (!deskActive || ppDir !== 1) return;
-      if (deskVideo.currentTime >= REVERSE_AT) {
-        deskVideo.pause();
-        ppDir = -1;
-        reverseStep();
-      }
-    });
-
-    function stopPingPong() {
-      deskVideo.pause();
-      if (ppRAF) { cancelAnimationFrame(ppRAF); ppRAF = null; }
-    }
-
-    function pingPongLoop() {}
-
-    function startPingPong() {
-      ppDir = 1;
-      deskVideo.currentTime = 0;
-      deskVideo.play().catch(() => {});
-      ppRAF = requestAnimationFrame(pingPongLoop);
-    }
+    deskVideo.loop = true;
 
     function showVideo(scale) {
-      deskActive = true;
       deskMedia.style.transform = `scale(${scale})`;
       deskMedia.style.boxShadow = '0 16px 40px rgba(0,0,0,0.2)';
       deskVideo.style.opacity = '1';
       deskImg.style.opacity = '0';
-      startPingPong();
+      deskVideo.currentTime = 0;
+      deskVideo.play().catch(() => {});
     }
 
     function hideVideo() {
-      deskActive = false;
       deskMedia.style.transform = 'scale(1)';
       deskMedia.style.boxShadow = 'none';
       deskVideo.style.opacity = '0';
       deskImg.style.opacity = '1';
-      stopPingPong();
+      deskVideo.pause();
     }
 
     const isTouchDevice = window.matchMedia('(hover: none)').matches;
@@ -1807,12 +1758,10 @@
       deskMedia.addEventListener('mouseenter', () => showVideo(1.5));
       deskMedia.addEventListener('mouseleave', hideVideo);
     } else {
-      // mobile: autoplay ping-pong, tap to zoom/unzoom
-      deskActive = true;
       deskVideo.addEventListener('canplay', () => {
         deskImg.style.opacity = '0';
         deskVideo.style.opacity = '1';
-        startPingPong();
+        deskVideo.play().catch(() => {});
       }, { once: true });
       deskVideo.load();
 
