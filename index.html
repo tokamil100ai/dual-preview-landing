@@ -1032,8 +1032,8 @@
     }
 
     @media (hover: hover) {
-      .desk-nudge {
-        animation: desk-nudge 5s ease-in-out 10s infinite;
+      .desk-nudge.nudge-ready {
+        animation: desk-nudge 5s ease-in-out infinite;
       }
       .desk-nudge:hover {
         animation-play-state: paused;
@@ -1584,7 +1584,7 @@
             <h2 style="margin:0;">Hey, I'm Kamil.</h2>
           </div>
         </div>
-        <p>Why did I build this? As a UX designer, I really wanted to get my hands dirty with AI and build something that solves a real problem. That meant going all the way - from idea to shipping, marketing, maintaining, and growing it. So this is it. Sure, it ain't much, but it's honest work.</p>
+        <p>Why did I build this? As a UX designer, I really wanted to get my hands dirty with AI and build something that solves a specific problem. That meant going all the way - from idea to shipping, marketing, maintaining, and growing it. So this is it. Sure, it ain't much, but it's honest work.</p>
         <p>I've spent 15+ years working in product, yet this project gave me a whole new kind of freedom. Building Dual Preview took real time and a lot of iteration. Don't let anyone tell you AI makes things happen instantly.</p>
         <p>Still, the process was mostly fun, and the learning was real. It feels like I've been walking my whole life and someone just handed me a bike.</p>
         <p>If it saves you even a few minutes a week, it was worth building.</p>
@@ -1752,6 +1752,22 @@
   const deskMedia = document.getElementById('deskMedia');
   const deskImg   = document.getElementById('deskImg');
   const deskVideo = document.getElementById('deskVideo');
+  const deskNudge = deskMedia ? deskMedia.closest('.desk-nudge') : null;
+
+  if (deskNudge) {
+    let nudgeTimer = null;
+    const nudgeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting && !nudgeTimer) {
+          nudgeTimer = setTimeout(() => deskNudge.classList.add('nudge-ready'), 10000);
+        } else if (!e.isIntersecting && nudgeTimer) {
+          clearTimeout(nudgeTimer);
+          nudgeTimer = null;
+        }
+      });
+    }, { threshold: 0.3 });
+    nudgeObserver.observe(deskNudge);
+  }
 
   if (deskMedia && deskImg && deskVideo) {
     deskVideo.loop = true;
