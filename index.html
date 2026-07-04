@@ -1838,8 +1838,8 @@
   if (emailLink) emailLink.addEventListener('click', () => posthog.capture('web_email_click'));
 
   // Hero video play
-  const heroVideo = document.querySelector('.video-container video');
-  if (heroVideo) heroVideo.addEventListener('play', () => posthog.capture('web_video_play'), { once: true });
+  const heroVideoEl = document.querySelector('.video-container video');
+  if (heroVideoEl) heroVideoEl.addEventListener('play', () => posthog.capture('web_video_play'), { once: true });
 
   // Avatar hover/tap
   const avatarWrapEl = document.getElementById('avatarWrap');
