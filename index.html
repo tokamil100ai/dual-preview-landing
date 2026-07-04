@@ -10,6 +10,10 @@
   <meta property="og:description" content="Free Chrome extension that syncs desktop and mobile views instantly.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://dualpreview.com/share.png">
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+" (stub people)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_nL22fVfw4eqdaNBehSsD3buww4jbviStdFqdGK7qLyMv', { api_host: 'https://us.i.posthog.com', person_profiles: 'identified_only' });
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1808,9 +1812,67 @@
         deskZoomed = !deskZoomed;
         deskMedia.style.transform = deskZoomed ? 'scale(1.2)' : 'scale(1)';
         deskMedia.style.boxShadow = deskZoomed ? '0 16px 40px rgba(0,0,0,0.2)' : 'none';
+        if (deskZoomed) posthog.capture('web_desk_tap');
       });
     }
   }
+
+  // ── POSTHOG EVENTS ──
+
+  // CTA buttons
+  document.querySelectorAll('a[href*="chromewebstore"]').forEach(el => {
+    el.addEventListener('click', () => {
+      const loc = el.id === 'nav-cta' ? 'nav' : el.classList.contains('btn-primary-light') ? 'final_cta' : 'hero';
+      posthog.capture('web_cta_click', { location: loc });
+    });
+  });
+
+  // See how it works
+  const seeHowBtn = document.querySelector('a[href="#features"].btn-secondary');
+  if (seeHowBtn) seeHowBtn.addEventListener('click', () => posthog.capture('web_see_how_click'));
+
+  // LinkedIn & Email
+  const linkedinLink = document.querySelector('a[href*="linkedin"]');
+  if (linkedinLink) linkedinLink.addEventListener('click', () => posthog.capture('web_linkedin_click'));
+  const emailLink = document.querySelector('a[href^="mailto"]');
+  if (emailLink) emailLink.addEventListener('click', () => posthog.capture('web_email_click'));
+
+  // Hero video play
+  const heroVideo = document.querySelector('.video-container video');
+  if (heroVideo) heroVideo.addEventListener('play', () => posthog.capture('web_video_play'), { once: true });
+
+  // Avatar hover/tap
+  const avatarWrapEl = document.getElementById('avatarWrap');
+  if (avatarWrapEl) {
+    avatarWrapEl.addEventListener('mouseenter', () => posthog.capture('web_avatar_hover'), { once: true });
+    avatarWrapEl.addEventListener('touchend', () => posthog.capture('web_avatar_tap'), { once: true });
+  }
+
+  // Desk hover
+  const deskNudgeEl = document.querySelector('.desk-nudge');
+  if (deskNudgeEl) deskNudgeEl.addEventListener('mouseenter', () => posthog.capture('web_desk_hover'), { once: true });
+
+  // Section views
+  const sections = [
+    { el: document.querySelector('.hero'),          name: 'hero' },
+    { el: document.getElementById('features'),      name: 'features' },
+    { el: document.getElementById('who'),           name: 'who' },
+    { el: document.querySelector('.testimonials'),  name: 'testimonials' },
+    { el: document.getElementById('about'),         name: 'about' },
+    { el: document.querySelector('.final-cta'),     name: 'final_cta' },
+  ];
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(({ isIntersecting, target }) => {
+      if (isIntersecting) {
+        const section = sections.find(s => s.el === target);
+        if (section) {
+          posthog.capture('web_section_view', { section: section.name });
+          sectionObserver.unobserve(target);
+        }
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(({ el }) => { if (el) sectionObserver.observe(el); });
 </script>
 </body>
 </html>
