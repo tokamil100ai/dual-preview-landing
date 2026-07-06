@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/uninstall", "destination": "/uninstall.html" }
+  ]
+}
