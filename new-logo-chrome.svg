@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <linearGradient id="a" x1="3.2173" y1="15" x2="44.7812" y2="15" gradientUnits="userSpaceOnUse" gradientTransform="matrix(7.326983, 0, 0, 7.326983, 66.145882, 79.14131)">
+      <stop offset="0" stop-color="#d93025"/>
+      <stop offset="1" stop-color="#ea4335"/>
+    </linearGradient>
+    <linearGradient id="b" x1="20.7219" y1="47.6791" x2="41.5039" y2="11.6837" gradientUnits="userSpaceOnUse" gradientTransform="matrix(7.326983, 0, 0, 7.326983, 66.145882, 79.14131)">
+      <stop offset="0" stop-color="#fcc934"/>
+      <stop offset="1" stop-color="#fbbc04"/>
+    </linearGradient>
+    <linearGradient id="c" x1="26.5981" y1="46.5015" x2="5.8161" y2="10.506" gradientUnits="userSpaceOnUse" gradientTransform="matrix(7.326983, 0, 0, 7.326983, 66.145882, 79.14131)">
+      <stop offset="0" stop-color="#1e8e3e"/>
+      <stop offset="1" stop-color="#34a853"/>
+    </linearGradient>
+    <bx:export>
+      <bx:file format="svg" href="#object-0"/>
+      <bx:file format="svg" href="#object-1" path="Untitled 2.svg"/>
+      <bx:file format="svg" href="#object-2" path="Untitled 3.svg"/>
+    </bx:export>
+  </defs>
+  <g id="object-2">
+    <g>
+      <g>
+        <ellipse style="paint-order: stroke; fill: rgb(255, 255, 255); stroke: rgb(255, 255, 255);" cx="250" cy="250" rx="241.998" ry="241.998" id="object-0"/>
+        <g transform="matrix(0.954566, 0, 0, 0.954566, 18.994692, 6.59995)" style="" id="object-1">
+          <circle cx="241.991" cy="254.949" r="87.924" style="fill: rgb(255, 255, 255); stroke-width: 1;"/>
+          <path d="M 89.708 342.909 C 157.386 460.141 326.596 460.141 394.283 342.909 C 461.968 225.678 377.364 79.137 241.991 79.137 C 211.122 79.137 180.803 87.263 154.068 102.701 C 69.96 151.258 41.144 258.804 89.708 342.909 Z M 318.14 211.023 C 351.976 269.639 309.678 342.909 241.991 342.909 C 174.312 342.909 132.005 269.639 165.849 211.023 C 173.564 197.659 184.664 186.559 198.028 178.843 C 240.086 154.562 293.859 168.974 318.14 211.023 Z" style="fill: none; stroke-width: 1;"/>
+          <path d="M 241.991 167.062 L 394.259 167.062 C 326.611 49.853 157.445 49.829 89.758 167.017 C 89.743 167.039 89.729 167.062 89.721 167.084 L 165.849 298.947 L 165.922 298.933 C 132.005 240.457 174.113 167.193 241.72 167.062 C 241.807 167.062 241.902 167.062 241.991 167.062 Z" style="fill: url(&quot;#a&quot;); stroke-width: 1;"/>
+          <circle cx="241.991" cy="254.986" r="69.607" style="fill: rgb(26, 115, 232); stroke-width: 1;"/>
+          <path d="M 318.134 298.969 L 241.998 430.833 C 377.335 430.855 461.94 284.359 394.283 167.149 C 394.275 167.128 394.259 167.106 394.246 167.091 L 241.983 167.091 L 241.969 167.158 C 309.568 167.025 351.954 240.119 318.273 298.728 C 318.221 298.808 318.177 298.888 318.134 298.969 Z" style="fill: url(&quot;#b&quot;); stroke-width: 1;"/>
+          <path d="M 165.857 298.977 L 89.721 167.106 C 22.042 284.3 106.604 430.818 241.939 430.833 C 241.961 430.833 241.983 430.833 242.013 430.833 L 318.14 298.969 L 318.097 298.925 C 284.407 357.526 199.905 357.695 165.996 299.211 C 165.951 299.131 165.9 299.051 165.857 298.977 Z" style="fill: url(&quot;#c&quot;); stroke-width: 1;"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
