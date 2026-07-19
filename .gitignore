@@ -3,3 +3,6 @@ node_modules/
 _metadata/
 *.zip
 .vercel
+
+# internal docs — never publish
+DUAL_PREVIEW_WIKI.md
