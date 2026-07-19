@@ -12,35 +12,50 @@
 </head>
 <body>
   <h1>Privacy Policy — Dual Preview</h1>
-  <p><em>Last updated: June 2026</em></p>
+  <p><em>Last updated: July 2026</em></p>
 
   <p>Dual Preview is a Chrome extension that displays websites in mobile and desktop view side by side. This policy describes what data the extension accesses and how it is used.</p>
 
-  <h2>Data we collect</h2>
-  <p>The extension reads browsing history <strong>solely</strong> to provide URL autocomplete suggestions in the address bar. This data is never stored, transmitted, or shared.</p>
+  <h2>The short version</h2>
+  <p>Websites you preview load directly in your browser — your browsing traffic never passes through our servers. The extension does not collect, store, or transmit the content of pages you visit or the URLs you browse. The only data that leaves your device is anonymous feature-usage analytics, and — only if you actively use the AI features — the content of your AI questions.</p>
 
   <h2>Data stored locally</h2>
-  <p>The following preferences are saved in <code>chrome.storage.local</code> on your device only and are never sent anywhere:</p>
+  <p>The following is saved on your device only (in <code>chrome.storage.local</code> and the extension page's local storage) and is never sent anywhere:</p>
   <ul>
-    <li>Selected background color or image</li>
-    <li>Custom background images uploaded by the user</li>
-    <li>Scaling mode preference</li>
-    <li>Panel size settings</li>
+    <li>Panel layout, open tabs, and their navigation history inside the extension</li>
+    <li>Selected background color or image, including custom images you upload</li>
+    <li>Scaling mode, panel sizes, captions, pinned tools, and keyboard-shortcut preferences</li>
     <li>Audio mute preference</li>
+    <li>AI API keys you optionally provide (see "AI features" below)</li>
   </ul>
 
   <h2>Permissions used</h2>
   <ul>
-    <li><strong>cookies</strong> — removes deployment-pinning cookies for the extension's own new-tab page to ensure it always loads the latest version.</li>
-    <li><strong>declarativeNetRequest / declarativeNetRequestWithHostAccess</strong> — modifies the User-Agent request header to enable mobile or desktop browser emulation.</li>
-    <li><strong>history</strong> — provides URL suggestions in the address bar. Data is read locally and never transmitted.</li>
-    <li><strong>scripting</strong> — injects a script to override User-Agent strings in the page's JavaScript context for accurate emulation.</li>
-    <li><strong>storage / unlimitedStorage</strong> — stores user preferences and custom background images locally on your device.</li>
-    <li><strong>tabs</strong> — opens the extension panel in a new tab when the toolbar icon is clicked.</li>
+    <li><strong>Access to websites (host permissions)</strong> — required to load any website you choose into the preview panels and to run the device-emulation scripts inside them. The extension does not read or collect content from pages you are not previewing.</li>
+    <li><strong>declarativeNetRequest / declarativeNetRequestWithHostAccess</strong> — modifies the User-Agent request header so previewed sites serve their mobile or desktop version, and removes embedding restrictions only for pages loaded inside preview panels. Rules are scoped to previewed domains and cleaned up when the extension's tab is closed.</li>
+    <li><strong>history</strong> — provides URL autocomplete suggestions in the address bars. History is read locally and never stored or transmitted.</li>
+    <li><strong>debugger</strong> — used only when you enable the Network Speed (2G/3G/4G) simulation for a panel; Chrome shows its own notification bar while this is active. Detached automatically when throttling is turned off.</li>
+    <li><strong>browsingData</strong> — used only when you click "Clear cache" for a panel; clears cached data for that site's origin.</li>
+    <li><strong>webRequest</strong> — powers the Analytics Detector (BETA): it observes, locally in your browser, analytics requests made by pages inside your preview panels so it can display them to you. Nothing observed is stored or transmitted.</li>
+    <li><strong>cookies</strong> — removes deployment-pinning cookies for the extension's own new-tab page so it always loads the latest version.</li>
+    <li><strong>storage / unlimitedStorage</strong> — stores the local preferences listed above, including custom background images.</li>
+  </ul>
+
+  <h2>AI features (optional)</h2>
+  <p>The AI Inspect and Inspector chat features send your question together with the technical context of the element you selected (its HTML snippet and CSS styles) to an AI model provider. This happens only when you actively use these features:</p>
+  <ul>
+    <li>By default, requests are routed through the extension's own proxy endpoint to OpenAI. The proxy does not log or store your conversations.</li>
+    <li>If you provide your own API key (OpenAI, Google, or Anthropic), requests go directly from your browser to that provider under their privacy terms. Keys are stored only locally on your device and are never sent to us.</li>
   </ul>
 
   <h2>Analytics</h2>
-  <p>The extension uses <a href="https://posthog.com" target="_blank">PostHog</a> to collect anonymous usage analytics (e.g. which features are used, how often the extension is opened). No personally identifiable information is collected. No URLs of visited websites are tracked. Data is processed on PostHog's EU cloud servers. You can opt out at any time by contacting us.</p>
+  <p>The extension uses <a href="https://posthog.com" target="_blank" rel="noopener">PostHog</a> (EU cloud servers) to collect anonymous usage analytics under a randomly generated installation ID — e.g. which features are used and how often the extension is opened. Automatic event capture and session recording are disabled. No personally identifiable information is collected, and no URLs or content of websites you preview are tracked. You can opt out at any time by contacting us.</p>
+
+  <h2>Third-party services</h2>
+  <ul>
+    <li><strong>Favicon service</strong> — address-bar suggestions display site icons fetched from Google's public favicon service; only the domain of the suggested site is sent for this purpose.</li>
+    <li><strong>New-tab page and configuration</strong> — the extension's built-in new-tab page and a small configuration file are hosted on Vercel and loaded like a regular web page.</li>
+  </ul>
 
   <h2>Data sharing</h2>
   <p>Dual Preview does not sell or transfer any user data to third parties. Anonymous analytics data is processed by PostHog solely for product improvement purposes.</p>
@@ -48,6 +63,6 @@
   <h2>Contact</h2>
   <p>Questions? Email: <a href="mailto:tokamil100@gmail.com">tokamil100@gmail.com</a></p>
 
-  <footer>Dual Preview &copy; 2025</footer>
+  <footer>Dual Preview &copy; 2026</footer>
 </body>
 </html>
