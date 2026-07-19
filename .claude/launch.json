@@ -6,6 +6,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "7432", "--directory", "/Users/kamil/Desktop/dual-browser/app"],
       "port": 7432
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "7433", "--directory", "/Users/kamil/Claude/Projects/Dual Preview (1)"],
+      "port": 7433
     }
   ]
 }
